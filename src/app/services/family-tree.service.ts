@@ -508,5 +508,41 @@ export class FamilyTreeService {
     return true;
   }
 
+  private saveToLocalStorage(): void {
+    try {
+      // Séparer les photos pour éviter de surcharger le localStorage
+      const familiesWithoutLargePhotos = this.families.map(family => ({
+        ...family,
+        members: this.processMembersForStorage(family.members)
+      }));
 
+      localStorage.setItem('familyTreeData', JSON.stringify(familiesWithoutLargePhotos));
+
+      // Stocker les photos séparément si elles sont trop grandes
+      this.savePhotosToSeparateStorage();
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error);
+      // Essayer sans les photos si erreur de quota
+      this.saveWithoutPhotos();
+    }
+  }
+
+  private processMembersForStorage(members: Person[]): Person[] {
+    return members.map(member => {
+      const processedMember = { ...member };
+
+      // Si la photo est trop grande, la stocker séparément
+      if (member.photo && member.photo.length > 50000) {
+        const photoId = `photo_${member.id}_${Date.now()}`;
+        this.photoStorageService.cachePhoto(photoId, member.photo);
+        processedMember.photo = photoId; // Stocker seulement l'ID
+      }
+
+      if (member.children && member.children.length > 0) {
+        processedMember.children = this.processMembersForStorage(member.children);
+      }
+
+      return processedMember;
+    });
+  }
 }
