@@ -508,7 +508,7 @@ export class FamilyTreeService {
     return true;
   }
 
-  private saveToLocalStorage(): void {
+  /*private saveToLocalStorage(): void {
     try {
       // Séparer les photos pour éviter de surcharger le localStorage
       const familiesWithoutLargePhotos = this.families.map(family => ({
@@ -544,5 +544,5 @@ export class FamilyTreeService {
 
       return processedMember;
     });
-  }
+  }*/
 }
