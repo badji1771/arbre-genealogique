@@ -1,0 +1,111 @@
+<div *ngIf="show" class="modal-overlay" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3 class="modal-title">{{ title }}</h3>
+      <button (click)="onClose()" class="modal-close">
+        ✕
+      </button>
+    </div>
+
+    <div *ngIf="isParent" class="parent-notice">
+      <div class="parent-icon">👨‍👦</div>
+      <div class="parent-text">
+        Ajout en tant qu'enfant de
+        <strong>{{ parentName }}</strong>
+      </div>
+    </div>
+
+    <form [formGroup]="personForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label class="form-label">Prénom *</label>
+        <input
+          type="text"
+          formControlName="prenom"
+          placeholder="Entrez le prénom"
+          class="form-input"
+          [class.input-error]="prenomInvalid"
+        />
+        <div *ngIf="prenomInvalid" class="error-message">
+          Le prénom est requis
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Nom *</label>
+        <input
+          type="text"
+          formControlName="nom"
+          placeholder="Entrez le nom"
+          class="form-input"
+          [class.input-error]="nomInvalid"
+        />
+        <div *ngIf="nomInvalid" class="error-message">
+          Le nom est requis
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Genre *</label>
+        <select
+          formControlName="genre"
+          class="form-input"
+        >
+          <option *ngFor="let genre of genres" [value]="genre.value">
+            {{ genre.label }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">📞 Téléphone</label>
+        <input
+          type="tel"
+          formControlName="telephone"
+          placeholder="+221 XX XXX XX XX"
+          class="form-input"
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">📧 Email</label>
+        <input
+          type="email"
+          formControlName="email"
+          placeholder="email@exemple.com"
+          class="form-input"
+          [class.input-error]="emailInvalid"
+        />
+        <div *ngIf="emailInvalid" class="error-message">
+          Format d'email invalide
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">📍 Adresse</label>
+        <input
+          type="text"
+          formControlName="adresse"
+          placeholder="Entrez l'adresse"
+          class="form-input"
+        />
+      </div>
+
+      <div class="modal-actions">
+        <button
+          type="submit"
+          class="btn-save"
+          [disabled]="!personForm.valid"
+        >
+          {{ buttonText }}
+        </button>
+        <button
+          type="button"
+          (click)="onClose()"
+          class="btn-cancel"
+        >
+          Annuler
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

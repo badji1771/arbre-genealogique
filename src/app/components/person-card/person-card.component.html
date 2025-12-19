@@ -1,0 +1,50 @@
+<div class="person-card-container">
+  <div
+    [class]="getCardClass()"
+    (click)="onSelect()"
+  >
+    <!-- Avatar -->
+    <div class="person-avatar">
+      <div class="avatar-icon">👤</div>
+    </div>
+
+    <!-- Info -->
+    <div class="person-info">
+      <div class="person-firstname">{{ person.prenom }}</div>
+      <div class="person-lastname">{{ person.nom }}</div>
+      <div *ngIf="person.email" class="person-email">
+        📧 {{ person.email }}
+      </div>
+    </div>
+
+    <!-- Badge enfants -->
+    <div *ngIf="person.children && person.children.length > 0" class="children-badge">
+      {{ person.children.length }}
+    </div>
+  </div>
+
+  <!-- Boutons d'action -->
+  <div class="action-buttons">
+    <button
+      (click)="onAddChild($event)"
+      class="btn-action btn-add"
+      title="Ajouter un enfant"
+    >
+      ➕
+    </button>
+    <button
+      (click)="onEdit($event)"
+      class="btn-action btn-edit"
+      title="Modifier"
+    >
+      ✏️
+    </button>
+    <button
+      (click)="onDelete($event)"
+      class="btn-action btn-delete"
+      title="Supprimer"
+    >
+      🗑️
+    </button>
+  </div>
+</div>

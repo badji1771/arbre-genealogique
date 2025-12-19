@@ -1,0 +1,240 @@
+<div class="app-container">
+  <!-- Header -->
+  <header class="app-header">
+    <h1 class="app-title">🌳 Arbre Généalogique</h1>
+    <p class="app-subtitle">
+      <span class="heart-icon">❤️</span>
+      Tracez l'histoire de votre famille
+    </p>
+
+    <!-- Boutons d'export -->
+    <div class="export-buttons">
+      <button
+        (click)="exportCurrentFamily()"
+        [disabled]="!selectedFamily"
+        class="export-btn btn-export-family"
+      >
+        <span class="btn-icon">📊</span>
+        Exporter {{ selectedFamily?.name || '' }}
+      </button>
+
+      <button
+        (click)="exportAllFamilies()"
+        [disabled]="families.length === 0"
+        class="export-btn btn-export-all"
+      >
+        <span class="btn-icon">📁</span>
+        Exporter toutes les familles
+      </button>
+
+      <button
+        (click)="exportStatistics()"
+        [disabled]="families.length === 0"
+        class="export-btn btn-export-stats"
+      >
+        <span class="btn-icon">📈</span>
+        Statistiques
+      </button>
+
+      <button
+        (click)="exportToJson()"
+        [disabled]="families.length === 0"
+        class="export-btn btn-export-json"
+      >
+        <span class="btn-icon">💾</span>
+        Exporter JSON
+      </button>
+
+      <label class="export-btn btn-import-json">
+        <span class="btn-icon">📤</span>
+        Importer JSON
+        <input type="file" accept=".json" (change)="importFromJson($event)" class="file-input">
+      </label>
+
+      <button
+        (click)="clearAllData()"
+        [disabled]="families.length === 0"
+        class="export-btn btn-clear-data"
+      >
+        <span class="btn-icon">🗑️</span>
+        Tout effacer
+      </button>
+    </div>
+  </header>
+
+  <div class="app-content">
+    <!-- Sidebar -->
+    <div class="sidebar-container">
+      <app-family-sidebar></app-family-sidebar>
+    </div>
+
+    <!-- Main Tree View -->
+    <div class="main-container">
+      <div *ngIf="selectedFamily; else welcomeTemplate" class="family-container">
+        <div class="family-header">
+          <div class="family-info">
+            <h2 class="family-title">Famille {{ selectedFamily.name }}</h2>
+            <p class="family-dates">
+              Créée le {{ selectedFamily.createdAt | date:'dd/MM/yyyy' }} •
+              Dernière modification: {{ selectedFamily.updatedAt | date:'dd/MM/yyyy HH:mm' }}
+            </p>
+          </div>
+          <button
+            (click)="openAddPersonModal()"
+            class="btn-add-member"
+          >
+            <span class="btn-icon">👤</span>
+            Nouveau membre
+          </button>
+          <button
+            (click)="toggleShowAllGenerations()"
+            class="btn-add-member"
+          >
+            <span class="btn-icon">👁️</span>
+            {{ showAllGenerations ? 'Masquer' : 'Afficher' }} les générations
+          </button>
+        </div>
+
+        <div class="tree-container">
+          <div *ngIf="selectedFamily.members.length === 0; else treeTemplate" class="empty-family">
+            <div class="empty-icon">👨‍👩‍👧‍👦</div>
+            <p class="empty-title">Aucun membre</p>
+            <p class="empty-description">Ajoutez le premier membre fondateur de la famille</p>
+          </div>
+
+          <ng-template #treeTemplate>
+            <div class="tree-wrapper">
+              <!-- Render tree recursively -->
+              <div class="tree-level" *ngFor="let node of treeData">
+                <div class="tree-node-container">
+                  <app-person-card
+                    [person]="node.person"
+                    [isSelected]="node.isSelected"
+                    (select)="selectedPerson = $event"
+                    (addChild)="openAddPersonModal($event)"
+                    (edit)="openEditPersonModal($event)"
+                    (delete)="deletePerson($event)"
+                  ></app-person-card>
+
+                  <!-- Connecteurs vers les enfants -->
+                  <div *ngIf="node.person.children && node.person.children.length > 0" class="tree-children">
+                    <!-- Ligne verticale -->
+                    <div class="vertical-line"></div>
+
+                    <!-- Point de connexion -->
+                    <div class="connection-point"></div>
+
+                    <!-- Ligne horizontale si plusieurs enfants -->
+                    <div *ngIf="node.person.children.length > 1" class="horizontal-line-container">
+                      <div class="horizontal-line"></div>
+                      <div *ngFor="let child of node.person.children; let idx = index"
+                           class="vertical-connector"
+                           [style.left.%]="((idx + 1) / (node.person.children.length + 1)) * 100">
+                      </div>
+                    </div>
+
+                    <!-- Ligne verticale simple pour un seul enfant -->
+                    <div *ngIf="node.person.children.length === 1" class="vertical-line-single"></div>
+
+                    <!-- Enfants -->
+                    <div class="children-container">
+                      <div *ngFor="let child of node.person.children" class="child-node">
+                        <app-person-card
+                          [person]="child"
+                          [isSelected]="selectedPerson?.id === child.id"
+                          (select)="selectedPerson = $event"
+                          (addChild)="openAddPersonModal($event)"
+                          (edit)="openEditPersonModal($event)"
+                          (delete)="deletePerson($event)"
+                        ></app-person-card>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+      <ng-template #welcomeTemplate>
+        <div class="welcome-container">
+          <div class="welcome-icon">👨‍👩‍👧‍👦</div>
+          <h3 class="welcome-title">Bienvenue !</h3>
+          <p class="welcome-description">
+            Sélectionnez une famille existante ou créez-en une nouvelle pour commencer à construire votre arbre généalogique
+          </p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <app-person-modal
+    [show]="showPersonModal"
+    [editingPerson]="editingPerson"
+    [parentName]="parentForNewChild ? parentForNewChild.prenom + ' ' + parentForNewChild.nom : ''"
+    (close)="closePersonModal()"
+    (save)="onPersonFormSubmit($event)"
+  ></app-person-modal>
+
+  <!-- Panneau d'information de la personne sélectionnée -->
+  <div *ngIf="selectedPerson && selectedFamily" class="person-details-panel">
+    <div class="panel-header">
+      <h3 class="panel-title">Informations</h3>
+      <button (click)="selectedPerson = null" class="panel-close">
+        ✕
+      </button>
+    </div>
+
+    <div class="panel-content">
+      <div class="person-header">
+        <div [class]="'person-avatar-large ' + (selectedPerson.genre === 'homme' ? 'avatar-man' : 'avatar-woman')">
+          <div class="avatar-large-icon">👤</div>
+        </div>
+        <div class="person-header-info">
+          <h4 class="person-fullname">{{ selectedPerson.prenom }} {{ selectedPerson.nom }}</h4>
+.
+          <p class="person-gender">{{ selectedPerson.genre === 'homme' ? 'Homme' : 'Femme' }}</p>
+        </div>
+      </div>
+
+      <div class="person-details">
+        <div *ngIf="selectedPerson.telephone" class="detail-item">
+          <span class="detail-icon">📱</span>
+          <span class="detail-text">{{ selectedPerson.telephone }}</span>
+        </div>
+
+        <div *ngIf="selectedPerson.email" class="detail-item">
+          <span class="detail-icon">📧</span>
+          <span class="detail-text">{{ selectedPerson.email }}</span>
+        </div>
+
+        <div *ngIf="selectedPerson.adresse" class="detail-item">
+          <span class="detail-icon">📍</span>
+          <span class="detail-text">{{ selectedPerson.adresse }}</span>
+        </div>
+
+        <div *ngIf="(selectedPerson.children?.length ?? 0) > 0" class="children-section">
+          <p class="children-title">Enfants ({{ selectedPerson.children?.length ?? 0 }}) :</p>
+          <div class="children-list">
+            <span *ngFor="let child of selectedPerson.children"
+                  class="child-tag">
+              {{ child.prenom }}
+            </span>
+          </div>
+        </div>
+
+        <div class="panel-actions">
+          <button
+            (click)="openEditPersonModal(selectedPerson!)"
+            class="btn-edit-person"
+          >
+            <span class="btn-icon">✏️</span>
+            Modifier
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,50 @@
+<div class="sidebar">
+  <div class="sidebar-header">
+    <h2 class="sidebar-title">👨‍👩‍👧‍👦 Familles</h2>
+    <button
+      (click)="showAddFamily = true"
+      class="btn-add-family"
+      title="Ajouter une famille"
+    >
+      ➕
+    </button>
+  </div>
+
+  <div *ngIf="showAddFamily" class="add-family-form">
+    <input
+      type="text"
+      [(ngModel)]="newFamilyName"
+      placeholder="Nom de la famille"
+      class="family-input"
+      (keyup.enter)="addFamily()"
+    />
+    <div class="form-buttons">
+      <button (click)="addFamily()" class="btn-create">
+        Créer
+      </button>
+      <button (click)="cancelAddFamily()" class="btn-cancel">
+        ✕
+      </button>
+    </div>
+  </div>
+
+  <div class="families-list">
+    <div *ngFor="let family of families"
+         [class]="'family-item ' + (selectedFamily?.id === family.id ? 'family-item-selected' : '')"
+         (click)="selectFamily(family)">
+      <div class="family-name">{{ family.name }}</div>
+      <div class="family-members">
+        {{ family.members.length }} membre{{ family.members.length > 1 ? 's' : '' }}
+      </div>
+      <div class="family-date">
+        {{ family.createdAt | date:'dd/MM/yyyy' }}
+      </div>
+    </div>
+
+    <div *ngIf="families.length === 0" class="empty-state">
+      <div class="empty-icon">👨‍👩‍👧‍👦</div>
+      <p>Aucune famille</p>
+      <p class="empty-hint">Créez-en une !</p>
+    </div>
+  </div>
+</div>

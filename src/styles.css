@@ -1,0 +1,102 @@
+/* You can add global styles to this file, and also import other style files */
+/* Global Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #F0F9FF 0%, #F5F3FF 100%);
+  min-height: 100vh;
+  color: #374151;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F3F4F6;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #A5B4FC;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8B5CF6;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Utility classes */
+.fade-in {
+  animation: fadeIn 0.3s ease;
+}
+
+.slide-in-up {
+  animation: slideInUp 0.3s ease;
+}
+
+/* Button focus styles */
+button:focus {
+  outline: 2px solid #8B5CF6;
+  outline-offset: 2px;
+}
+
+/* Input focus styles */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid #8B5CF6;
+  outline-offset: 2px;
+}
+
+/* Responsive images */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Loading animation */
+.loading-spinner {
+  border: 3px solid #F3F4F6;
+  border-top: 3px solid #8B5CF6;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
