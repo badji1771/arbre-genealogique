@@ -1,240 +1,760 @@
-<div class="app-container">
-  <!-- Header -->
-  <header class="app-header">
-    <h1 class="app-title">🌳 Arbre Généalogique</h1>
-    <p class="app-subtitle">
-      <span class="heart-icon">❤️</span>
-      Tracez l'histoire de votre famille
-    </p>
+<div class="app-container modern-home">
+  <!-- Header simplifié et élégant -->
+  <header class="modern-header">
+    <div class="header-top">
+      <div class="logo-container">
+        <div class="logo-animated">
+          <span class="logo-tree">🌳</span>
+          <div class="logo-pulse"></div>
+        </div>
+        <div class="logo-text">
+          <h1 class="logo-title">Arbre Généalogique</h1>
+          <p class="logo-subtitle">Connectez votre histoire familiale</p>
+        </div>
+      </div>
 
-    <!-- Boutons d'export -->
-    <div class="export-buttons">
-      <button
-        (click)="exportCurrentFamily()"
-        [disabled]="!selectedFamily"
-        class="export-btn btn-export-family"
-      >
-        <span class="btn-icon">📊</span>
-        Exporter {{ selectedFamily?.name || '' }}
-      </button>
+      <div class="header-actions">
+        <button class="btn-import" (click)="triggerImport()">
+          <span class="btn-icon">📤</span>
+          Importer
+        </button>
+        <button class="btn-guide" (click)="showGuide()">
+          <span class="btn-icon">❓</span>
+          Guide
+        </button>
+      </div>
+    </div>
 
-      <button
-        (click)="exportAllFamilies()"
-        [disabled]="families.length === 0"
-        class="export-btn btn-export-all"
-      >
-        <span class="btn-icon">📁</span>
-        Exporter toutes les familles
-      </button>
-
-      <button
-        (click)="exportStatistics()"
-        [disabled]="families.length === 0"
-        class="export-btn btn-export-stats"
-      >
-        <span class="btn-icon">📈</span>
-        Statistiques
-      </button>
-
-      <button
-        (click)="exportToJson()"
-        [disabled]="families.length === 0"
-        class="export-btn btn-export-json"
-      >
-        <span class="btn-icon">💾</span>
-        Exporter JSON
-      </button>
-
-      <label class="export-btn btn-import-json">
-        <span class="btn-icon">📤</span>
-        Importer JSON
-        <input type="file" accept=".json" (change)="importFromJson($event)" class="file-input">
-      </label>
-
-      <button
-        (click)="clearAllData()"
-        [disabled]="families.length === 0"
-        class="export-btn btn-clear-data"
-      >
-        <span class="btn-icon">🗑️</span>
-        Tout effacer
+    <!-- Indicateur de famille sélectionnée -->
+    <div *ngIf="selectedFamily" class="family-indicator">
+      <div class="indicator-content">
+        <div class="indicator-icon">🏠</div>
+        <div class="indicator-info">
+          <h3>{{ selectedFamily.name }}</h3>
+          <div class="indicator-stats">
+            <span class="stat">👥 {{ getTotalMembers(selectedFamily) }} membres</span>
+            <span class="stat">🌳 {{ maxLevel + 1 }} générations</span>
+            <span class="stat">📅 {{ selectedFamily.createdAt | date:'dd/MM/yyyy' }}</span>
+          </div>
+        </div>
+      </div>
+      <button class="btn-manage" (click)="manageFamily()">
+        <span class="btn-icon">⚙️</span>
+        Gérer
       </button>
     </div>
   </header>
 
-  <div class="app-content">
-    <!-- Sidebar -->
-    <div class="sidebar-container">
-      <app-family-sidebar></app-family-sidebar>
-    </div>
-
-    <!-- Main Tree View -->
-    <div class="main-container">
-      <div *ngIf="selectedFamily; else welcomeTemplate" class="family-container">
-        <div class="family-header">
-          <div class="family-info">
-            <h2 class="family-title">Famille {{ selectedFamily.name }}</h2>
-            <p class="family-dates">
-              Créée le {{ selectedFamily.createdAt | date:'dd/MM/yyyy' }} •
-              Dernière modification: {{ selectedFamily.updatedAt | date:'dd/MM/yyyy HH:mm' }}
-            </p>
-          </div>
+  <!-- Contenu principal redessiné -->
+  <main class="modern-main">
+    <!-- Sidebar des familles améliorée -->
+    <aside class="modern-sidebar">
+      <div class="sidebar-section">
+        <div class="section-header">
+          <h3>
+            <span class="section-icon">📚</span>
+            Vos Familles
+          </h3>
           <button
-            (click)="openAddPersonModal()"
-            class="btn-add-member"
+            class="btn-add-circle"
+            (click)="showAddFamily = !showAddFamily"
+            [class.active]="showAddFamily"
           >
-            <span class="btn-icon">👤</span>
-            Nouveau membre
-          </button>
-          <button
-            (click)="toggleShowAllGenerations()"
-            class="btn-add-member"
-          >
-            <span class="btn-icon">👁️</span>
-            {{ showAllGenerations ? 'Masquer' : 'Afficher' }} les générations
+            +
           </button>
         </div>
 
-        <div class="tree-container">
-          <div *ngIf="selectedFamily.members.length === 0; else treeTemplate" class="empty-family">
-            <div class="empty-icon">👨‍👩‍👧‍👦</div>
-            <p class="empty-title">Aucun membre</p>
-            <p class="empty-description">Ajoutez le premier membre fondateur de la famille</p>
+        <!-- Formulaire d'ajout intégré -->
+        <div *ngIf="showAddFamily" class="add-family-card">
+          <input
+            type="text"
+            [(ngModel)]="newFamilyName"
+            placeholder="Nom de la nouvelle famille..."
+            class="modern-input"
+            (keyup.enter)="addNewFamily()"
+          />
+          <div class="card-actions">
+            <button (click)="addNewFamily()" class="btn-confirm">
+              <span class="btn-icon">✓</span>
+              Créer
+            </button>
+            <button (click)="showAddFamily = false" class="btn-cancel">
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <!-- Liste des familles avec visualisation -->
+        <div class="families-container">
+          <div
+            *ngFor="let family of families"
+            class="family-card"
+            [class.active]="selectedFamily?.id === family.id"
+            (click)="selectFamily(family)"
+          >
+            <div class="card-header">
+              <div class="family-avatar">
+                <span class="avatar-icon">🏠</span>
+                <div class="avatar-progress">
+                  <div
+                    class="progress-fill"
+                    [style.width.%]="(family.members.length / 50) * 100"
+                  ></div>
+                </div>
+              </div>
+              <div class="family-meta">
+                <h4>{{ family.name }}</h4>
+                <div class="meta-info">
+                  <span class="info-item">
+                    <span class="info-icon">👤</span>
+                    {{ family.members.length }}
+                  </span>
+                  <span class="info-item">
+                    <span class="info-icon">📅</span>
+                    {{ family.createdAt | date:'dd/MM' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-preview">
+              <div class="preview-tree">
+                <div class="tree-level" *ngFor="let level of [1,2,3]"></div>
+              </div>
+              <button class="btn-quick-view" (click)="quickView(family)">
+                👁️
+              </button>
+            </div>
           </div>
 
-          <ng-template #treeTemplate>
-            <div class="tree-wrapper">
-              <!-- Render tree recursively -->
-              <div class="tree-level" *ngFor="let node of treeData">
-                <div class="tree-node-container">
-                  <app-person-card
-                    [person]="node.person"
-                    [isSelected]="node.isSelected"
-                    (select)="selectedPerson = $event"
-                    (addChild)="openAddPersonModal($event)"
-                    (edit)="openEditPersonModal($event)"
-                    (delete)="deletePerson($event)"
-                  ></app-person-card>
+          <!-- État vide visuel -->
+          <div *ngIf="families.length === 0" class="empty-state">
+            <div class="empty-illustration">
+              <div class="illustration-tree">
+                <div class="tree-trunk"></div>
+                <div class="tree-branches">
+                  <div class="branch"></div>
+                  <div class="branch"></div>
+                  <div class="branch"></div>
+                </div>
+              </div>
+            </div>
+            <div class="empty-content">
+              <h4>Aucune famille créée</h4>
+              <p>Commencez votre premier arbre généalogique</p>
+              <button (click)="showAddFamily = true" class="btn-start">
+                <span class="btn-icon">🌱</span>
+                Créer une famille
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-                  <!-- Connecteurs vers les enfants -->
-                  <div *ngIf="node.person.children && node.person.children.length > 0" class="tree-children">
-                    <!-- Ligne verticale -->
-                    <div class="vertical-line"></div>
+      <!-- Statistiques globales -->
+      <div class="sidebar-section stats-section">
+        <h3>
+          <span class="section-icon">📊</span>
+          Vue d'ensemble
+        </h3>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-icon">👥</div>
+            <div class="stat-details">
+              <div class="stat-value">{{ getTotalMembersAllFamilies() }}</div>
+              <div class="stat-label">Personnes totales</div>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon">🏠</div>
+            <div class="stat-details">
+              <div class="stat-value">{{ families.length }}</div>
+              <div class="stat-label">Familles</div>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon">🌳</div>
+            <div class="stat-details">
+              <div class="stat-value">{{ getTotalGenerations() }}</div>
+              <div class="stat-label">Générations</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
 
-                    <!-- Point de connexion -->
-                    <div class="connection-point"></div>
+    <!-- Zone centrale principale -->
+    <section class="main-content">
+      <!-- Vue d'accueil améliorée -->
+      <div *ngIf="!selectedFamily" class="welcome-dashboard">
+        <div class="dashboard-hero">
+          <div class="hero-content">
+            <div class="hero-animation">
+              <div class="family-tree-animation">
+                <div class="tree">
+                  <div class="level" *ngFor="let level of [1,2,3,4]"></div>
+                </div>
+                <div class="members">
+                  <div class="member" style="top: 20%; left: 50%;">👨</div>
+                  <div class="member" style="top: 40%; left: 30%;">👩</div>
+                  <div class="member" style="top: 40%; left: 70%;">👨</div>
+                  <div class="member" style="top: 60%; left: 20%;">👦</div>
+                  <div class="member" style="top: 60%; left: 50%;">👧</div>
+                  <div class="member" style="top: 60%; left: 80%;">👶</div>
+                </div>
+              </div>
+            </div>
 
-                    <!-- Ligne horizontale si plusieurs enfants -->
-                    <div *ngIf="node.person.children.length > 1" class="horizontal-line-container">
-                      <div class="horizontal-line"></div>
-                      <div *ngFor="let child of node.person.children; let idx = index"
-                           class="vertical-connector"
-                           [style.left.%]="((idx + 1) / (node.person.children.length + 1)) * 100">
+            <div class="hero-text">
+              <h2>Préservez votre héritage familial</h2>
+              <p class="hero-description">
+                Créez, visualisez et partagez votre arbre généalogique
+                avec une interface moderne et intuitive
+              </p>
+
+              <div class="hero-actions">
+                <button (click)="createFirstFamily()" class="btn-hero-primary">
+                  <span class="btn-icon">🌳</span>
+                  Démarrer mon arbre
+                </button>
+                <button (click)="openSample()" class="btn-hero-secondary">
+                  <span class="btn-icon">👁️</span>
+                  Voir un exemple
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fonctionnalités principales -->
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">👥</div>
+            <h4>Ajout intuitif</h4>
+            <p>Ajoutez des membres facilement avec des formulaires intelligents</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h4>Export complet</h4>
+            <p>Exportez vos données en Excel, PDF et JSON</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🎨</div>
+            <h4>Visualisation</h4>
+            <p>Plusieurs vues pour explorer votre arbre</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">📱</div>
+            <h4>Multi-plateforme</h4>
+            <p>Accédez à votre arbre depuis tous vos appareils</p>
+          </div>
+        </div>
+
+        <!-- Démarrage rapide -->
+        <div class="quick-start">
+          <h3>Commencez rapidement</h3>
+          <div class="quick-options">
+            <button class="quick-option" (click)="startWithTemplate('simple')">
+              <span class="option-icon">🌱</span>
+              <div class="option-content">
+                <h5>Arbre simple</h5>
+                <p>Démarrez avec une structure basique</p>
+              </div>
+              <span class="option-arrow">→</span>
+            </button>
+
+            <button class="quick-option" (click)="importFromGedcom()">
+              <span class="option-icon">📤</span>
+              <div class="option-content">
+                <h5>Importer GEDCOM</h5>
+                <p>Importez un arbre existant</p>
+              </div>
+              <span class="option-arrow">→</span>
+            </button>
+
+            <button class="quick-option" (click)="openTutorial()">
+              <span class="option-icon">🎓</span>
+              <div class="option-content">
+                <h5>Guide pas à pas</h5>
+                <p>Apprenez à créer votre arbre</p>
+              </div>
+              <span class="option-arrow">→</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vue famille sélectionnée -->
+      <div *ngIf="selectedFamily" class="family-dashboard">
+        <!-- En-tête famille -->
+        <div class="family-header">
+          <div class="header-main">
+            <div class="breadcrumb">
+              <span class="crumb" (click)="selectedFamily = null">Familles</span>
+              <span class="separator">›</span>
+              <span class="crumb active">{{ selectedFamily.name }}</span>
+            </div>
+
+            <div class="header-actions">
+              <button
+                (click)="openAddPersonModal()"
+                class="btn-action-primary"
+              >
+                <span class="btn-icon">👤</span>
+                Ajouter un membre
+              </button>
+
+              <div class="dropdown">
+                <button class="btn-action-secondary">
+                  <span class="btn-icon">📋</span>
+                  Actions
+                </button>
+                <div class="dropdown-content">
+                  <button (click)="exportCurrentFamily()" class="dropdown-item">
+                    <span class="item-icon">📤</span>
+                    Exporter cette famille
+                  </button>
+                  <button (click)="duplicateFamily()" class="dropdown-item">
+                    <span class="item-icon">⎘</span>
+                    Dupliquer
+                  </button>
+                  <button (click)="shareFamily()" class="dropdown-item">
+                    <span class="item-icon">↗️</span>
+                    Partager
+                  </button>
+                  <div class="dropdown-divider"></div>
+                  <button (click)="editFamily()" class="dropdown-item">
+                    <span class="item-icon">✏️</span>
+                    Modifier
+                  </button>
+                  <button (click)="deleteFamily()" class="dropdown-item dangerous">
+                    <span class="item-icon">🗑️</span>
+                    Supprimer
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Statistiques famille -->
+          <div class="family-stats">
+            <div class="stat-card">
+              <div class="stat-trend" [class.positive]="getGrowthTrend() > 0">
+                {{ getGrowthTrend() > 0 ? '↗' : '→' }}
+              </div>
+              <div class="stat-main">
+                <div class="stat-value">{{ selectedFamily.members.length }}</div>
+                <div class="stat-label">Membres</div>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-main">
+                <div class="stat-value">{{ maxLevel + 1 }}</div>
+                <div class="stat-label">Générations</div>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-main">
+                <div class="stat-value">{{ getGenderCount('homme') }}</div>
+                <div class="stat-label">Hommes</div>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-main">
+                <div class="stat-value">{{ getGenderCount('femme') }}</div>
+                <div class="stat-label">Femmes</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vues de l'arbre -->
+        <div class="view-selector">
+          <div class="view-tabs">
+            <button
+              class="view-tab"
+              [class.active]="currentView === 'tree'"
+              (click)="setView('tree')"
+              data-view="tree"
+            >
+              <span class="tab-icon">🌳</span>
+              Vue arbre
+            </button>
+            <button
+              class="view-tab"
+              [class.active]="currentView === 'list'"
+              (click)="setView('list')"
+              data-view="list"
+            >
+              <span class="tab-icon">📋</span>
+              Vue liste
+            </button>
+            <button
+              class="view-tab"
+              [class.active]="currentView === 'timeline'"
+              (click)="setView('timeline')"
+              data-view="timeline"
+            >
+              <span class="tab-icon">📅</span>
+              Chronologie
+            </button>
+            <button
+              class="view-tab"
+              [class.active]="currentView === 'map'"
+              (click)="setView('map')"
+              data-view="map"
+            >
+              <span class="tab-icon">🗺️</span>
+              Carte
+            </button>
+          </div>
+
+          <div class="view-controls">
+            <button class="btn-control" (click)="expandAll()" title="Tout développer">
+              <span class="control-icon">⬇️</span>
+            </button>
+            <button class="btn-control" (click)="collapseAll()" title="Tout réduire">
+              <span class="control-icon">➡️</span>
+            </button>
+            <button class="btn-control" (click)="toggleViewMode()" title="Changer de vue">
+              <span class="control-icon">🔄</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Contenu de la vue arbre -->
+        <div class="view-content">
+          <div *ngIf="selectedFamily.members.length === 0" class="empty-family">
+            <div class="empty-illustration">
+              <div class="illustration-content">
+                <div class="tree-placeholder">
+                  <div class="trunk"></div>
+                  <div class="branches">
+                    <div class="branch"></div>
+                    <div class="branch"></div>
+                    <div class="branch"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="empty-message">
+              <h3>Votre arbre est vide</h3>
+              <p>Ajoutez le premier membre pour commencer à construire votre histoire familiale</p>
+              <button (click)="openAddPersonModal()" class="btn-start-tree">
+                <span class="btn-icon">👑</span>
+                Ajouter le fondateur
+              </button>
+            </div>
+          </div>
+
+          <!-- Vue arbre généalogique -->
+          <ng-container *ngIf="selectedFamily.members.length > 0 && currentView === 'tree'">
+            <div class="tree-view modern-tree" #treeContainer>
+              <div class="tree-wrapper">
+                <!-- Barre latérale des générations -->
+                <div class="generation-sidebar">
+                  <div
+                    *ngFor="let level of getGenerationLevels()"
+                    class="generation-marker"
+                    [class.visible]="!isLevelCollapsed(level)"
+                    (click)="scrollToGeneration(level)"
+                    [title]="getLevelInfo(level)"
+                  >
+                    <span class="marker-number">G{{ level + 1 }}</span>
+                    <span class="marker-line"></span>
+                  </div>
+                </div>
+
+                <!-- Contenu des générations -->
+                <div class="generations-content">
+                  <div
+                    *ngFor="let level of getGenerationLevels()"
+                    [id]="'generation-' + level"
+                    class="generation-level"
+                    [class.collapsed]="isLevelCollapsed(level)"
+                  >
+                    <!-- En-tête de génération -->
+                    <div *ngIf="!isLevelCollapsed(level)" class="level-header">
+                      <div class="level-title">
+                        <span class="title-icon">{{ getGenerationIcon(level) }}</span>
+                        <h3>{{ getGenerationTitle(level) }}</h3>
+                        <span class="level-count">{{ getMemberCountByLevel(level) }} membre(s)</span>
                       </div>
+                      <button (click)="toggleLevel(level)" class="btn-toggle">
+                        {{ isLevelCollapsed(level) ? 'Afficher' : 'Masquer' }}
+                      </button>
                     </div>
 
-                    <!-- Ligne verticale simple pour un seul enfant -->
-                    <div *ngIf="node.person.children.length === 1" class="vertical-line-single"></div>
+                    <!-- Contenu de génération -->
+                    <div *ngIf="!isLevelCollapsed(level)" class="level-content">
+                      <div class="members-grid">
+                        <ng-container *ngFor="let node of getNodesByLevel(level)">
+                          <div class="member-node">
+                            <!-- Connexion parent -->
+                            <div *ngIf="level > 0" class="parent-connection">
+                              <div class="connection-line"></div>
+                              <div class="connection-arrow">↓</div>
+                            </div>
 
-                    <!-- Enfants -->
-                    <div class="children-container">
-                      <div *ngFor="let child of node.person.children" class="child-node">
-                        <app-person-card
-                          [person]="child"
-                          [isSelected]="selectedPerson?.id === child.id"
-                          (select)="selectedPerson = $event"
-                          (addChild)="openAddPersonModal($event)"
-                          (edit)="openEditPersonModal($event)"
-                          (delete)="deletePerson($event)"
-                        ></app-person-card>
+                            <!-- Carte personne -->
+                            <app-person-card
+                              [person]="node.person"
+                              [isSelected]="node.isSelected"
+                              [generation]="level"
+                              (select)="selectedPerson = $event"
+                              (addChild)="openAddPersonModal($event)"
+                              (edit)="openEditPersonModal($event)"
+                              (delete)="deletePerson($event)"
+                            ></app-person-card>
+
+                            <!-- Indicateur enfants -->
+                            <div
+                              *ngIf="node.children && node.children.length > 0"
+                              class="children-indicator"
+                              (click)="scrollToGeneration(level + 1)"
+                            >
+                              <span class="indicator-icon">⬇️</span>
+                              <span class="indicator-text">{{ node.children.length }} enfant(s)</span>
+                            </div>
+                          </div>
+                        </ng-container>
+                      </div>
+
+                      <!-- Génération vide -->
+                      <div *ngIf="getMemberCountByLevel(level) === 0" class="empty-generation">
+                        <span class="empty-icon">👥</span>
+                        <p>Aucun membre dans cette génération</p>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </ng-template>
+          </ng-container>
+
+          <!-- Vue liste -->
+          <ng-container *ngIf="selectedFamily.members.length > 0 && currentView === 'list'">
+            <div class="list-view">
+              <div class="list-header">
+                <h3>Liste des membres</h3>
+                <div class="list-stats">
+                  {{ getTotalMembers(selectedFamily) }} membres
+                </div>
+              </div>
+              <div class="members-list">
+                <div *ngFor="let person of getAllMembersFlat()" class="list-item">
+                  <div class="list-item-avatar">
+                    {{ person.prenom.charAt(0) }}{{ person.nom.charAt(0) }}
+                  </div>
+                  <div class="list-item-content">
+                    <h4>{{ person.prenom }} {{ person.nom }}</h4>
+                    <div class="list-item-meta">
+                      <span class="meta-item">{{ person.genre === 'homme' ? '👨' : '👩' }}</span>
+                      <span class="meta-item">G{{ getPersonGeneration(person) + 1 }}</span>
+                      <span *ngIf="person.telephone" class="meta-item">📱 {{ person.telephone }}</span>
+                    </div>
+                  </div>
+                  <div class="list-item-actions">
+                    <button (click)="selectedPerson = person" class="btn-action">👁️</button>
+                    <button (click)="openEditPersonModal(person)" class="btn-action">✏️</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- Vue chronologie -->
+          <ng-container *ngIf="selectedFamily.members.length > 0 && currentView === 'timeline'">
+            <div class="timeline-view">
+              <div class="timeline-empty">
+                <div class="empty-icon">📅</div>
+                <h3>Chronologie</h3>
+                <p>Fonctionnalité à venir</p>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- Vue carte -->
+          <ng-container *ngIf="selectedFamily.members.length > 0 && currentView === 'map'">
+            <div class="map-view">
+              <div class="map-empty">
+                <div class="empty-icon">🗺️</div>
+                <h3>Carte géographique</h3>
+                <p>Fonctionnalité à venir</p>
+              </div>
+            </div>
+          </ng-container>
         </div>
       </div>
+    </section>
+  </main>
 
-      <ng-template #welcomeTemplate>
-        <div class="welcome-container">
-          <div class="welcome-icon">👨‍👩‍👧‍👦</div>
-          <h3 class="welcome-title">Bienvenue !</h3>
-          <p class="welcome-description">
-            Sélectionnez une famille existante ou créez-en une nouvelle pour commencer à construire votre arbre généalogique
-          </p>
-        </div>
-      </ng-template>
-    </div>
-  </div>
-
-  <!-- Modal -->
-  <app-person-modal
-    [show]="showPersonModal"
-    [editingPerson]="editingPerson"
-    [parentName]="parentForNewChild ? parentForNewChild.prenom + ' ' + parentForNewChild.nom : ''"
-    (close)="closePersonModal()"
-    (save)="onPersonFormSubmit($event)"
-  ></app-person-modal>
-
-  <!-- Panneau d'information de la personne sélectionnée -->
-  <div *ngIf="selectedPerson && selectedFamily" class="person-details-panel">
-    <div class="panel-header">
-      <h3 class="panel-title">Informations</h3>
-      <button (click)="selectedPerson = null" class="panel-close">
-        ✕
-      </button>
-    </div>
-
-    <div class="panel-content">
-      <div class="person-header">
-        <div [class]="'person-avatar-large ' + (selectedPerson.genre === 'homme' ? 'avatar-man' : 'avatar-woman')">
-          <div class="avatar-large-icon">👤</div>
-        </div>
-        <div class="person-header-info">
-          <h4 class="person-fullname">{{ selectedPerson.prenom }} {{ selectedPerson.nom }}</h4>
-.
-          <p class="person-gender">{{ selectedPerson.genre === 'homme' ? 'Homme' : 'Femme' }}</p>
+  <!-- Barre latérale contextuelle des détails personne -->
+  <aside class="context-sidebar" [class.visible]="selectedPerson">
+    <div *ngIf="selectedPerson" class="sidebar-content">
+      <div class="sidebar-header">
+        <h3>
+          <span class="header-icon">📋</span>
+          Détails du membre
+        </h3>
+        <div class="header-actions">
+          <button (click)="openEditPersonModal(selectedPerson)" class="sidebar-btn" title="Modifier">
+            ✏️
+          </button>
+          <button (click)="selectedPerson = null" class="sidebar-btn sidebar-close" title="Fermer">
+            ✕
+          </button>
         </div>
       </div>
 
       <div class="person-details">
-        <div *ngIf="selectedPerson.telephone" class="detail-item">
-          <span class="detail-icon">📱</span>
-          <span class="detail-text">{{ selectedPerson.telephone }}</span>
-        </div>
-
-        <div *ngIf="selectedPerson.email" class="detail-item">
-          <span class="detail-icon">📧</span>
-          <span class="detail-text">{{ selectedPerson.email }}</span>
-        </div>
-
-        <div *ngIf="selectedPerson.adresse" class="detail-item">
-          <span class="detail-icon">📍</span>
-          <span class="detail-text">{{ selectedPerson.adresse }}</span>
-        </div>
-
-        <div *ngIf="(selectedPerson.children?.length ?? 0) > 0" class="children-section">
-          <p class="children-title">Enfants ({{ selectedPerson.children?.length ?? 0 }}) :</p>
-          <div class="children-list">
-            <span *ngFor="let child of selectedPerson.children"
-                  class="child-tag">
-              {{ child.prenom }}
-            </span>
+        <!-- En-tête personne -->
+        <div class="person-header">
+          <div [class]="'person-avatar ' + (selectedPerson.genre === 'homme' ? 'avatar-man' : 'avatar-woman')">
+            <span class="avatar-initials">{{ getPersonDetails(selectedPerson).initials }}</span>
+            <span class="avatar-badge">{{ selectedPerson.genre === 'homme' ? '👨' : '👩' }}</span>
+          </div>
+          <div class="person-info">
+            <h4>{{ selectedPerson.prenom }} {{ selectedPerson.nom }}</h4>
+            <div class="person-tags">
+              <span class="tag">Génération {{ getPersonGeneration(selectedPerson) + 1 }}</span>
+              <span class="tag tag-id">ID: {{ selectedPerson.id }}</span>
+            </div>
           </div>
         </div>
 
-        <div class="panel-actions">
-          <button
-            (click)="openEditPersonModal(selectedPerson!)"
-            class="btn-edit-person"
-          >
-            <span class="btn-icon">✏️</span>
+        <!-- Contact -->
+        <div class="contact-section" *ngIf="selectedPerson.telephone || selectedPerson.email || selectedPerson.adresse">
+          <h5 class="section-title">Contact</h5>
+          <div class="contact-list">
+            <div *ngIf="selectedPerson.telephone" class="contact-item">
+              <span class="contact-icon">📱</span>
+              <div class="contact-details">
+                <span class="contact-label">Téléphone</span>
+                <span class="contact-value">{{ selectedPerson.telephone }}</span>
+              </div>
+            </div>
+            <div *ngIf="selectedPerson.email" class="contact-item">
+              <span class="contact-icon">📧</span>
+              <div class="contact-details">
+                <span class="contact-label">Email</span>
+                <span class="contact-value">{{ selectedPerson.email }}</span>
+              </div>
+            </div>
+            <div *ngIf="selectedPerson.adresse" class="contact-item">
+              <span class="contact-icon">📍</span>
+              <div class="contact-details">
+                <span class="contact-label">Adresse</span>
+                <span class="contact-value">{{ selectedPerson.adresse }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Famille -->
+        <div class="family-section">
+          <!-- Enfants -->
+          <div *ngIf="selectedPerson.children && selectedPerson.children.length > 0" class="family-relations">
+            <h5 class="section-title">
+              <span class="section-icon">👶</span>
+              Enfants ({{ selectedPerson.children.length }})
+            </h5>
+            <div class="children-list">
+              <div *ngFor="let child of selectedPerson.children" class="child-item">
+                <div class="child-avatar">{{ child.prenom.charAt(0) }}{{ child.nom.charAt(0) }}</div>
+                <div class="child-info">
+                  <span class="child-name">{{ child.prenom }} {{ child.nom }}</span>
+                  <span class="child-gender">{{ child.genre === 'homme' ? '👦' : '👧' }}</span>
+                </div>
+                <button (click)="selectedPerson = child" class="child-action" title="Voir">
+                  👁️
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Parent -->
+          <div *ngIf="selectedPerson.parentId" class="family-relations">
+            <h5 class="section-title">
+              <span class="section-icon">👤</span>
+              Parent
+            </h5>
+            <div class="parent-item">
+              <span class="parent-name">{{ getParentName(selectedPerson.parentId) }}</span>
+              <button
+                (click)="navigateToParent(selectedPerson.parentId)"
+                class="parent-action"
+                title="Voir le parent"
+              >
+                ↗️
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions rapides -->
+        <div class="quick-actions">
+          <button (click)="openAddPersonModal(selectedPerson)" class="btn-quick-action">
+            <span class="action-icon">➕</span>
+            Ajouter un enfant
+          </button>
+          <button (click)="openEditPersonModal(selectedPerson)" class="btn-quick-action">
+            <span class="action-icon">✏️</span>
             Modifier
+          </button>
+          <button (click)="deletePerson(selectedPerson.id)" class="btn-quick-action btn-danger">
+            <span class="action-icon">🗑️</span>
+            Supprimer
           </button>
         </div>
       </div>
     </div>
+  </aside>
+
+  <!-- Navigation rapide -->
+  <nav class="quick-nav">
+    <button class="nav-btn" (click)="scrollToTop()" title="Haut">
+      <span class="nav-icon">↑</span>
+    </button>
+    <div class="nav-separator"></div>
+    <button class="nav-btn" (click)="toggleSidebar()" title="Familles">
+      <span class="nav-icon">🏠</span>
+    </button>
+    <div class="nav-separator"></div>
+    <button class="nav-btn" (click)="addQuickPerson()" title="Ajouter rapidement">
+      <span class="nav-icon">+</span>
+    </button>
+    <div class="nav-separator"></div>
+    <button class="nav-btn" (click)="searchPersons()" title="Rechercher">
+      <span class="nav-icon">🔍</span>
+    </button>
+    <div class="nav-separator"></div>
+    <button class="nav-btn" (click)="scrollToBottom()" title="Bas">
+      <span class="nav-icon">↓</span>
+    </button>
+  </nav>
+
+  <!-- Notifications toast -->
+  <div class="toast-container">
+    <div *ngFor="let toast of toasts" class="toast" [class]="toast.type">
+      <span class="toast-icon">{{ toast.icon }}</span>
+      <span class="toast-message">{{ toast.message }}</span>
+      <button class="toast-close" (click)="dismissToast(toast)">×</button>
+    </div>
   </div>
 </div>
+
+<!-- Modal de personne -->
+<app-person-modal
+  [show]="showPersonModal"
+  [editingPerson]="editingPerson"
+  [parentName]="parentForNewChild ? parentForNewChild.prenom + ' ' + parentForNewChild.nom : ''"
+  (close)="closePersonModal()"
+  (save)="onPersonFormSubmit($event)"
+></app-person-modal>

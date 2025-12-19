@@ -1,10 +1,13 @@
 import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import { Person } from '../../models/person.model';
+import {CommonModule} from "@angular/common";
 
 @Component({
   selector: 'app-person-modal',
   templateUrl: './person-modal.component.html',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   styleUrls: ['./person-modal.component.css']
 })
 export class PersonModalComponent implements OnInit {

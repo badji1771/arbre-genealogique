@@ -1,10 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { FamilyTreeService } from '../../services/family-tree.service';
 import { Family } from '../../models/person.model';
+import {FormsModule} from "@angular/forms";
+import {CommonModule} from "@angular/common";
 
 @Component({
   selector: 'app-family-sidebar',
   templateUrl: './family-sidebar.component.html',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   styleUrls: ['./family-sidebar.component.css']
 })
 export class FamilySidebarComponent implements OnInit {
