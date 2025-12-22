@@ -5,9 +5,16 @@ export interface Person {
   telephone?: string;
   adresse?: string;
   email?: string;
-  parentId?: number | null;
   genre: 'homme' | 'femme';
+  parentId?: number | null;
   children?: Person[];
+  photo?: string; // ← AJOUTEZ CETTE LIGNE
+  dateNaissance?: Date;
+  dateDeces?: Date;
+  profession?: string;
+  notes?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface Family {
@@ -16,4 +23,7 @@ export interface Family {
   members: Person[];
   createdAt: Date;
   updatedAt: Date;
+  coverPhoto?: string; // Optionnel : photo de couverture de la famille
 }
+
+

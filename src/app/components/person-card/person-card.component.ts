@@ -1,23 +1,35 @@
-import {ChangeDetectionStrategy, Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, Pipe, PipeTransform } from '@angular/core';
 import { Person } from '../../models/person.model';
-import {CommonModule} from "@angular/common";
+import { CommonModule } from "@angular/common";
+
+@Pipe({
+  name: 'truncate',
+  standalone: true
+})
+export class TruncatePipe implements PipeTransform {
+  transform(value: string, limit: number = 25, trail: string = '...'): string {
+    if (!value) return '';
+    return value.length > limit ? value.substring(0, limit) + trail : value;
+  }
+}
 
 @Component({
   selector: 'app-person-card',
   templateUrl: './person-card.component.html',
   standalone: true,
-  imports: [CommonModule],
-  styleUrls: ['./person-card.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  imports: [CommonModule, TruncatePipe],
+  styleUrls: ['./person-card.component.css']
 })
 export class PersonCardComponent {
   @Input() person!: Person;
   @Input() isSelected: boolean = false;
+  @Input() generation: number = 0;
+
   @Output() select = new EventEmitter<Person>();
   @Output() addChild = new EventEmitter<Person>();
   @Output() edit = new EventEmitter<Person>();
   @Output() delete = new EventEmitter<number>();
-  @Input() generation: number = 0;
+  @Output() viewDetails = new EventEmitter<Person>();
 
   getCardClass(): string {
     const classes = ['person-card'];
@@ -33,22 +45,53 @@ export class PersonCardComponent {
     // Classe de génération
     classes.push(`generation-${this.generation}`);
 
+    // Classe pour les photos
+    if (this.person.photo) {
+      classes.push('has-photo');
+    }
+
     return classes.join(' ');
   }
-  getGenerationColor(): string {
-    const colors = [
-      '#4F46E5', // Indigo - Fondateurs
-      '#7C3AED', // Violet - Génération 1
-      '#10B981', // Émeraude - Génération 2
-      '#F59E0B', // Ambre - Génération 3
-      '#EF4444', // Rouge - Génération 4
-      '#EC4899', // Rose - Génération 5
-      '#6366F1', // Indigo light
-      '#8B5CF6', // Violet light
-      '#059669', // Émeraude light
-    ];
 
-    return colors[this.generation % colors.length];
+  getGradient(): string {
+    const colors = {
+      homme: [
+        ['#3498db', '#2980b9'], // Bleu
+        ['#2ecc71', '#27ae60'], // Vert
+        ['#9b59b6', '#8e44ad'], // Violet
+        ['#34495e', '#2c3e50']  // Gris bleu
+      ],
+      femme: [
+        ['#e74c3c', '#c0392b'], // Rouge
+        ['#e67e22', '#d35400'], // Orange
+        ['#f1c40f', '#f39c12'], // Jaune
+        ['#1abc9c', '#16a085']  // Turquoise
+      ]
+    };
+
+    const genderColors = this.person.genre === 'homme' ? colors.homme : colors.femme;
+    const colorPair = genderColors[this.generation % genderColors.length];
+
+    return `linear-gradient(135deg, ${colorPair[0]}, ${colorPair[1]})`;
+  }
+
+  getInitials(): string {
+    return `${this.person.prenom.charAt(0)}${this.person.nom.charAt(0)}`.toUpperCase();
+  }
+
+  getAge(): number {
+    if (!this.person.dateNaissance) return 0;
+
+    const birthDate = new Date(this.person.dateNaissance);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+
+    return age;
   }
 
   onSelect(): void {
@@ -67,11 +110,19 @@ export class PersonCardComponent {
 
   onDelete(event: Event): void {
     event.stopPropagation();
-    if (confirm('Êtes-vous sûr de vouloir supprimer cette personne et ses descendants ?')) {
+    if (confirm(`Êtes-vous sûr de vouloir supprimer ${this.person.prenom} ${this.person.nom} et tous ses descendants ?`)) {
       this.delete.emit(this.person.id);
     }
   }
-  getInitials(): string {
-    return `${this.person.prenom.charAt(0)}${this.person.nom.charAt(0)}`.toUpperCase();
+
+  onViewDetails(event: Event): void {
+    event.stopPropagation();
+    this.viewDetails.emit(this.person);
+  }
+
+  onPhotoError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.style.display = 'none';
+    // L'avatar s'affichera automatiquement
   }
 }

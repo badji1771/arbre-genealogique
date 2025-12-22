@@ -121,7 +121,13 @@ export class FamilyTreeService {
     const updateInTree = (members: Person[]): boolean => {
       for (let i = 0; i < members.length; i++) {
         if (members[i].id === personId) {
-          members[i] = { ...members[i], ...updates };
+          // Préserver les enfants et l'ID
+          members[i] = {
+            ...members[i],
+            ...updates,
+            id: personId, // S'assurer que l'ID ne change pas
+            children: members[i].children || [] // Préserver les enfants
+          };
           return true;
         }
         const children = members[i].children;

@@ -7,6 +7,16 @@
       </button>
     </div>
 
+    <!-- Debug info (optionnel - à supprimer en production) -->
+    <div *ngIf="editingPerson" class="debug-info" style="background: #f0f0f0; padding: 0.5rem; margin: 0.5rem; border-radius: 4px;">
+      <small>
+        Mode: Édition |
+        ID: {{ editingPerson.id }} |
+        Nom: {{ editingPerson.nom }} {{ editingPerson.prenom }} |
+        Photo: {{ editingPerson.photo ? 'Oui' : 'Non' }}
+      </small>
+    </div>
+
     <div *ngIf="isParent" class="parent-notice">
       <div class="parent-icon">👨‍👦</div>
       <div class="parent-text">
@@ -16,92 +26,179 @@
     </div>
 
     <form [formGroup]="personForm" (ngSubmit)="onSubmit()">
-      <div class="form-group">
-        <label class="form-label">Prénom *</label>
-        <input
-          type="text"
-          formControlName="prenom"
-          placeholder="Entrez le prénom"
-          class="form-input"
-          [class.input-error]="prenomInvalid"
-        />
-        <div *ngIf="prenomInvalid" class="error-message">
-          Le prénom est requis
+      <!-- Section Photo -->
+      <div class="photo-section">
+        <div class="photo-container" (click)="triggerFileInput()">
+          <div *ngIf="!photoPreview && !personForm.get('photo')?.value" class="photo-placeholder">
+            <div class="placeholder-icon">📷</div>
+            <div class="placeholder-text">Cliquez pour ajouter une photo</div>
+            <div class="placeholder-hint">JPG, PNG - Max 5MB</div>
+          </div>
+          <img *ngIf="photoPreview || personForm.get('photo')?.value"
+               [src]="photoPreview || personForm.get('photo')?.value"
+               alt="Photo preview"
+               class="photo-preview">
+          <input
+            type="file"
+            #fileInput
+            accept="image/*"
+            (change)="onFileSelected($event)"
+            class="photo-input"
+            style="display: none;"
+          >
+        </div>
+        <div class="photo-actions" *ngIf="photoPreview || personForm.get('photo')?.value">
+          <button type="button" (click)="triggerFileInput()" class="btn-change-photo">
+            Changer la photo
+          </button>
+          <button type="button" (click)="removePhoto()" class="btn-remove-photo">
+            Supprimer
+          </button>
+        </div>
+      </div>
+
+      <!-- Informations personnelles -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Prénom *</label>
+          <input
+            type="text"
+            formControlName="prenom"
+            placeholder="Entrez le prénom"
+            class="form-input"
+            [class.input-error]="prenomInvalid"
+          />
+          <div *ngIf="prenomInvalid" class="error-message">
+            Le prénom est requis
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Nom *</label>
+          <input
+            type="text"
+            formControlName="nom"
+            placeholder="Entrez le nom"
+            class="form-input"
+            [class.input-error]="nomInvalid"
+          />
+          <div *ngIf="nomInvalid" class="error-message">
+            Le nom est requis
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Genre *</label>
+          <div class="gender-options">
+            <label class="gender-option" [class.selected]="personForm.get('genre')?.value === 'homme'">
+              <input
+                type="radio"
+                formControlName="genre"
+                value="homme"
+                class="gender-radio"
+              />
+              <div class="gender-content">
+                <span class="gender-icon">👨</span>
+                <span class="gender-label">Homme</span>
+              </div>
+            </label>
+            <label class="gender-option" [class.selected]="personForm.get('genre')?.value === 'femme'">
+              <input
+                type="radio"
+                formControlName="genre"
+                value="femme"
+                class="gender-radio"
+              />
+              <div class="gender-content">
+                <span class="gender-icon">👩</span>
+                <span class="gender-label">Femme</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Date de naissance</label>
+          <input
+            type="date"
+            formControlName="dateNaissance"
+            class="form-input"
+          />
         </div>
       </div>
 
       <div class="form-group">
-        <label class="form-label">Nom *</label>
+        <label class="form-label">Profession</label>
         <input
           type="text"
-          formControlName="nom"
-          placeholder="Entrez le nom"
+          formControlName="profession"
+          placeholder="Entrez la profession"
           class="form-input"
-          [class.input-error]="nomInvalid"
         />
-        <div *ngIf="nomInvalid" class="error-message">
-          Le nom est requis
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">📞 Téléphone</label>
+          <input
+            type="tel"
+            formControlName="telephone"
+            placeholder="+221 XX XXX XX XX"
+            class="form-input"
+          />
         </div>
-      </div>
 
-      <div class="form-group">
-        <label class="form-label">Genre *</label>
-        <select
-          formControlName="genre"
-          class="form-input"
-        >
-          <option *ngFor="let genre of genres" [value]="genre.value">
-            {{ genre.label }}
-          </option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">📞 Téléphone</label>
-        <input
-          type="tel"
-          formControlName="telephone"
-          placeholder="+221 XX XXX XX XX"
-          class="form-input"
-        />
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">📧 Email</label>
-        <input
-          type="email"
-          formControlName="email"
-          placeholder="email@exemple.com"
-          class="form-input"
-          [class.input-error]="emailInvalid"
-        />
-        <div *ngIf="emailInvalid" class="error-message">
-          Format d'email invalide
+        <div class="form-group">
+          <label class="form-label">📧 Email</label>
+          <input
+            type="email"
+            formControlName="email"
+            placeholder="email@exemple.com"
+            class="form-input"
+            [class.input-error]="emailInvalid"
+          />
+          <div *ngIf="emailInvalid" class="error-message">
+            Format d'email invalide
+          </div>
         </div>
       </div>
 
       <div class="form-group">
         <label class="form-label">📍 Adresse</label>
-        <input
-          type="text"
+        <textarea
           formControlName="adresse"
-          placeholder="Entrez l'adresse"
-          class="form-input"
-        />
+          placeholder="Entrez l'adresse complète"
+          class="form-input form-textarea"
+          rows="2"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">📝 Notes</label>
+        <textarea
+          formControlName="notes"
+          placeholder="Notes supplémentaires..."
+          class="form-input form-textarea"
+          rows="3"
+        ></textarea>
       </div>
 
       <div class="modal-actions">
         <button
           type="submit"
           class="btn-save"
-          [disabled]="!personForm.valid"
+          [disabled]="!personForm.valid || isProcessing"
         >
+          <span *ngIf="isProcessing" class="spinner"></span>
           {{ buttonText }}
         </button>
         <button
           type="button"
           (click)="onClose()"
           class="btn-cancel"
+          [disabled]="isProcessing"
         >
           Annuler
         </button>

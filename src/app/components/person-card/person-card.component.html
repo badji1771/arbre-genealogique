@@ -1,25 +1,56 @@
+
 <div class="person-card-container">
   <div
     [class]="getCardClass()"
     (click)="onSelect()"
   >
-    <!-- Avatar -->
-    <div class="person-avatar">
-      <div class="avatar-icon">👤</div>
+    <!-- Avatar ou Photo -->
+    <div class="person-avatar" [style.background]="getGradient()">
+      <div *ngIf="!person.photo" class="avatar-initials">
+        {{ getInitials() }}
+      </div>
+      <img *ngIf="person.photo"
+           [src]="person.photo"
+           [alt]="person.prenom + ' ' + person.nom"
+           class="person-photo"
+           (error)="onPhotoError($event)">
+    </div>
+
+    <!-- Badge genre -->
+    <div class="gender-badge" [class.male]="person.genre === 'homme'" [class.female]="person.genre === 'femme'">
+      {{ person.genre === 'homme' ? '👨' : '👩' }}
     </div>
 
     <!-- Info -->
     <div class="person-info">
-      <div class="person-firstname">{{ person.prenom }}</div>
-      <div class="person-lastname">{{ person.nom }}</div>
-      <div *ngIf="person.email" class="person-email">
-        📧 {{ person.email }}
+      <div class="person-name">
+        <div class="person-firstname">{{ person.prenom }}</div>
+        <div class="person-lastname">{{ person.nom }}</div>
+      </div>
+
+      <div *ngIf="person.profession" class="person-profession">
+        💼 {{ person.profession }}
+      </div>
+
+      <div *ngIf="person.dateNaissance" class="person-age">
+        🎂 {{ getAge() }} ans
+      </div>
+
+      <div *ngIf="person.email" class="person-email" title="Email">
+        📧 {{ person.email | truncate:20 }}
       </div>
     </div>
 
     <!-- Badge enfants -->
-    <div *ngIf="person.children && person.children.length > 0" class="children-badge">
-      {{ person.children.length }}
+    <div *ngIf="person.children && person.children.length > 0"
+         class="children-badge"
+         title="{{ person.children.length }} enfant(s)">
+      👶 {{ person.children.length }}
+    </div>
+
+    <!-- Indicateur photo -->
+    <div *ngIf="person.photo" class="photo-indicator" title="Photo disponible">
+      📷
     </div>
   </div>
 
@@ -30,7 +61,14 @@
       class="btn-action btn-add"
       title="Ajouter un enfant"
     >
-      ➕
+      👶
+    </button>
+    <button
+      (click)="onViewDetails($event)"
+      class="btn-action btn-view"
+      title="Voir détails"
+    >
+      👁️
     </button>
     <button
       (click)="onEdit($event)"
@@ -46,5 +84,11 @@
     >
       🗑️
     </button>
+  </div>
+
+  <!-- Infobulle rapide -->
+  <div class="quick-info" *ngIf="person.notes && person.notes.length > 0">
+    <div class="info-icon">📝</div>
+    <div class="info-text">{{ person.notes | truncate:50 }}</div>
   </div>
 </div>

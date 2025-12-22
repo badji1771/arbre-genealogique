@@ -38,9 +38,9 @@
           </div>
         </div>
       </div>
-      <button class="btn-manage" (click)="manageFamily()">
-        <span class="btn-icon">⚙️</span>
-        Gérer
+      <button class="btn-action-primary" (click)="openJsonManager()">
+        <span class="btn-icon">💾</span>
+        Gérer les données
       </button>
     </div>
   </header>
@@ -503,6 +503,7 @@
                             </div>
 
                             <!-- Carte personne -->
+
                             <app-person-card
                               [person]="node.person"
                               [isSelected]="node.isSelected"
@@ -511,6 +512,7 @@
                               (addChild)="openAddPersonModal($event)"
                               (edit)="openEditPersonModal($event)"
                               (delete)="deletePerson($event)"
+                              (viewDetails)="onViewDetails($event)"
                             ></app-person-card>
 
                             <!-- Indicateur enfants -->
@@ -561,7 +563,7 @@
                     </div>
                   </div>
                   <div class="list-item-actions">
-                    <button (click)="selectedPerson = person" class="btn-action">👁️</button>
+                    <button (click)="onViewDetails(person)" class="btn-action">👁️</button>
                     <button (click)="openEditPersonModal(person)" class="btn-action">✏️</button>
                   </div>
                 </div>
@@ -748,6 +750,10 @@
       <button class="toast-close" (click)="dismissToast(toast)">×</button>
     </div>
   </div>
+  <app-json-manager
+    *ngIf="showJsonManager"
+    (close)="closeJsonManager()"
+  ></app-json-manager>
 </div>
 
 <!-- Modal de personne -->

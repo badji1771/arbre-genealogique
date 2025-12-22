@@ -1,0 +1,136 @@
+<!-- components/json-manager/json-manager.component.html -->
+<div class="json-manager">
+  <div class="manager-header">
+    <h3>📁 Gestion des données JSON</h3>
+    <button (click)="onClose()" class="btn-close">✕</button>
+  </div>
+
+  <div class="manager-content">
+    <!-- Statistiques -->
+    <div class="stats-section">
+      <h4>📊 Statistiques</h4>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-icon">🏠</div>
+          <div class="stat-info">
+            <div class="stat-value">{{ getStats().totalFamilies }}</div>
+            <div class="stat-label">Familles</div>
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon">👥</div>
+          <div class="stat-info">
+            <div class="stat-value">{{ getStats().totalPersons }}</div>
+            <div class="stat-label">Personnes</div>
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon">💾</div>
+          <div class="stat-info">
+            <div class="stat-value">{{ getStats().storageUsed }}</div>
+            <div class="stat-label">Stockage</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Export -->
+    <div class="section">
+      <h4>📤 Exporter les données</h4>
+      <p>Exportez toutes vos données dans un fichier JSON.</p>
+      <button
+        (click)="exportToFile()"
+        [disabled]="isExporting"
+        class="btn btn-export"
+      >
+        <span *ngIf="isExporting" class="spinner"></span>
+        {{ isExporting ? 'Export en cours...' : '📥 Exporter en JSON' }}
+      </button>
+    </div>
+
+    <!-- Import -->
+    <div class="section">
+      <h4>📥 Importer des données</h4>
+      <p>Importez des données depuis un fichier JSON.</p>
+      <div class="import-box">
+        <input
+          type="file"
+          accept=".json"
+          (change)="onFileSelected($event)"
+          [disabled]="isImporting"
+          class="file-input"
+          #fileInput
+        >
+        <button
+          (click)="fileInput.click()"
+          [disabled]="isImporting"
+          class="btn btn-import"
+        >
+          <span *ngIf="isImporting" class="spinner"></span>
+          {{ isImporting ? 'Import en cours...' : '📁 Choisir un fichier' }}
+        </button>
+      </div>
+      <small class="hint">Format accepté: JSON</small>
+    </div>
+
+    <!-- Sauvegardes -->
+    <div class="section">
+      <h4>💾 Sauvegardes automatiques</h4>
+      <p>Créez et gérez des sauvegardes de vos données.</p>
+
+      <button (click)="createBackup()" class="btn btn-backup">
+        ⚡ Créer une sauvegarde
+      </button>
+
+      <button
+        (click)="showBackupList = !showBackupList"
+        class="btn btn-toggle"
+      >
+        {{ showBackupList ? 'Masquer' : 'Afficher' }} les sauvegardes
+      </button>
+
+      <div *ngIf="showBackupList && getBackups().length > 0" class="backup-list">
+        <div *ngFor="let backup of getBackups()" class="backup-item">
+          <div class="backup-info">
+            <div class="backup-name">{{ backup.name }}</div>
+            <div class="backup-date">
+              {{ backup.timestamp | date:'dd/MM/yyyy HH:mm' }}
+            </div>
+          </div>
+          <div class="backup-actions">
+            <button
+              (click)="restoreBackup(backup)"
+              class="btn-action btn-restore"
+              title="Restaurer"
+            >
+              ↩️
+            </button>
+            <button
+              (click)="deleteBackup(backup)"
+              class="btn-action btn-delete"
+              title="Supprimer"
+            >
+              🗑️
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="showBackupList && getBackups().length === 0" class="empty-backups">
+        Aucune sauvegarde disponible
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div class="info-section">
+      <h4>ℹ️ Informations</h4>
+      <div class="info-content">
+        <p><strong>Dernière sauvegarde:</strong>
+          {{ getStats().lastBackup ? (getStats().lastBackup | date:'dd/MM/yyyy HH:mm') : 'Aucune' }}
+        </p>
+        <p class="tip">💡 Les données sont automatiquement sauvegardées dans votre navigateur.</p>
+        <p class="tip">💡 Exportez régulièrement vos données pour une sécurité supplémentaire.</p>
+      </div>
+    </div>
+  </div>
+</div>

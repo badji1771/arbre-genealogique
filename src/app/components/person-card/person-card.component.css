@@ -1,288 +1,341 @@
 .person-card-container {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 10px;
+  transition: all 0.3s ease;
 }
 
 .person-card {
-  position: relative;
-  width: 200px;
+  background: white;
   border-radius: 16px;
-  padding: 20px;
+  padding: 1.25rem;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid transparent;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .person-card:hover {
-  transform: scale(1.05);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  border-color: #667eea;
 }
 
 .person-card-selected {
-  transform: scale(1.05);
-  box-shadow: 0 0 0 4px #FFD700, 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-color: #667eea;
+  background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);
+  box-shadow: 0 8px 30px rgba(102, 126, 234, 0.2);
 }
 
 .person-card-man {
-  background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
+  border-left: 4px solid #3498db;
 }
 
 .person-card-woman {
-  background: linear-gradient(135deg, #EC4899 0%, #BE185D 100%);
+  border-left: 4px solid #e74c3c;
 }
 
+/* Avatar/Photo Styles */
 .person-avatar {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(10px);
-  border: 4px solid rgba(255, 255, 255, 0.4);
+  margin: 0 auto 1rem;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 15px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border: 3px solid white;
 }
 
-.avatar-icon {
-  font-size: 36px;
+.avatar-initials {
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.person-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.person-card:hover .person-photo {
+  transform: scale(1.1);
+}
+
+/* Gender Badge */
+.gender-badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 2;
+}
+
+.gender-badge.male {
+  background: linear-gradient(135deg, #3498db, #2980b9);
   color: white;
 }
 
+.gender-badge.female {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+}
+
+/* Person Info */
 .person-info {
   text-align: center;
-  color: white;
+  margin-bottom: 1rem;
+}
+
+.person-name {
+  margin-bottom: 0.75rem;
 }
 
 .person-firstname {
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 2px;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 0.25rem;
+  transition: color 0.3s ease;
+}
+
+.person-card:hover .person-firstname {
+  color: #667eea;
 }
 
 .person-lastname {
-  font-size: 16px;
-  opacity: 0.9;
+  font-size: 1.1rem;
+  color: #4a5568;
   font-weight: 500;
 }
 
+.person-profession,
+.person-age,
 .person-email {
-  font-size: 12px;
-  margin-top: 8px;
-  opacity: 0.8;
+  font-size: 0.85rem;
+  color: #718096;
+  margin-top: 0.35rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 0.35rem;
 }
 
+.person-profession::before,
+.person-age::before,
+.person-email::before {
+  font-size: 0.9rem;
+}
+
+/* Children Badge */
 .children-badge {
   position: absolute;
-  bottom: -15px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: linear-gradient(to right, #10B981, #059669);
+  bottom: 15px;
+  right: 15px;
+  background: linear-gradient(135deg, #10b981, #059669);
   color: white;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  font-weight: bold;
-  border: 4px solid white;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  gap: 0.25rem;
+  transition: all 0.3s ease;
 }
 
+.person-card:hover .children-badge {
+  transform: scale(1.1);
+}
+
+/* Photo Indicator */
+.photo-indicator {
+  position: absolute;
+  bottom: 15px;
+  left: 15px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0.4rem;
+  border-radius: 50%;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(4px);
+}
+
+/* Action Buttons */
 .action-buttons {
   display: flex;
-  gap: 8px;
-  margin-top: 30px;
-  background: white;
-  border-radius: 12px;
-  padding: 8px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 1rem;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+}
+
+.person-card-container:hover .action-buttons {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .btn-action {
-  padding: 8px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   border: none;
-  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .btn-action:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: scale(1.15) translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
 .btn-add {
-  background: linear-gradient(to right, #10B981, #059669);
+  background: linear-gradient(135deg, #10b981, #059669);
   color: white;
 }
 
 .btn-edit {
-  background: linear-gradient(to right, #3B82F6, #1D4ED8);
+  background: linear-gradient(135deg, #f59e0b, #d97706);
   color: white;
 }
 
 .btn-delete {
-  background: linear-gradient(to right, #EF4444, #DC2626);
+  background: linear-gradient(135deg, #ef4444, #dc2626);
   color: white;
 }
 
+.btn-view {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+}
 
-/* Photo container */
-.person-photo-container {
-  width: 80px;
-  height: 80px;
+/* Quick Info */
+.quick-info {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border-radius: 10px;
+  padding: 0.75rem;
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: 2px solid #fbbf24;
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.info-icon {
+  font-size: 1.2rem;
   flex-shrink: 0;
 }
 
-.person-avatar {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
+.info-text {
+  font-size: 0.85rem;
+  color: #78350f;
+  line-height: 1.4;
 }
 
-.person-avatar.man {
-  background: linear-gradient(135deg, #3498db, #2980b9);
+/* Generation Colors - bordures subtiles */
+.generation-0 .person-avatar { border-color: #ffd700; } /* Or - Fondateurs */
+.generation-1 .person-avatar { border-color: #c0c0c0; } /* Argent - Génération 1 */
+.generation-2 .person-avatar { border-color: #cd7f32; } /* Bronze - Génération 2 */
+.generation-3 .person-avatar { border-color: #4ade80; } /* Vert - Génération 3 */
+.generation-4 .person-avatar { border-color: #60a5fa; } /* Bleu - Génération 4 */
+.generation-5 .person-avatar { border-color: #c084fc; } /* Violet - Génération 5 */
+
+/* Responsive */
+@media (max-width: 768px) {
+  .person-card {
+    padding: 1rem;
+  }
+
+  .person-avatar {
+    width: 70px;
+    height: 70px;
+  }
+
+  .avatar-initials {
+    font-size: 1.7rem;
+  }
+
+  .person-firstname {
+    font-size: 1.2rem;
+  }
+
+  .person-lastname {
+    font-size: 1rem;
+  }
+
+  .action-buttons {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .btn-action {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
 }
 
-.person-avatar.woman {
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
+/* Animation pour les nouvelles cartes */
+@keyframes cardAppear {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
-.avatar-text {
-  font-size: 1.8rem;
-  font-weight: 600;
-  color: white;
+.person-card {
+  animation: cardAppear 0.4s ease-out;
 }
 
-.avatar-gender {
+/* Effet de brillance au survol */
+.person-card::before {
+  content: '';
   position: absolute;
-  bottom: 5px;
-  right: 5px;
-  font-size: 1.2rem;
-}
-
-.person-photo {
+  top: 0;
+  left: -100%;
   width: 100%;
   height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid white;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.7s ease;
 }
 
-/* Dans components/person-modal/person-modal.component.css */
-
-.photo-section {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.photo-preview {
-  width: 120px;
-  height: 120px;
-  margin: 0 auto 1rem;
-  border-radius: 50%;
-  background: #f5f5f5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  overflow: hidden;
-  border: 2px dashed #ddd;
-  transition: all 0.3s ease;
-}
-
-.photo-preview:hover {
-  border-color: #3498db;
-  background: #e3f2fd;
-}
-
-.photo-placeholder {
-  text-align: center;
-  color: #666;
-}
-
-.placeholder-icon {
-  font-size: 2.5rem;
-  display: block;
-  margin-bottom: 0.5rem;
-}
-
-.placeholder-text {
-  font-size: 0.9rem;
-}
-
-.person-photo {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.btn-remove-photo {
-  background: #e74c3c;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: background 0.2s ease;
-}
-
-.btn-remove-photo:hover {
-  background: #c0392b;
-}
-
-/* Dans app.component.css pour la sidebar */
-
-.person-details .person-avatar {
-  width: 100px;
-  height: 100px;
-  margin: 0 auto 1.5rem;
-}
-
-.person-details .person-photo {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 4px solid white;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-/* Style pour les différentes générations */
-.generation-0 .person-avatar {
-  border: 3px solid gold;
-}
-
-.generation-1 .person-avatar {
-  border: 3px solid silver;
-}
-
-.generation-2 .person-avatar {
-  border: 3px solid #cd7f32;
+.person-card:hover::before {
+  left: 100%;
 }

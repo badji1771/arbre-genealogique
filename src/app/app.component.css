@@ -2821,3 +2821,35 @@ body {
     right: -100%;
   }
 }
+
+/* Ajoutez dans app.component.css */
+.person-context-menu {
+  animation: contextMenuAppear 0.2s ease-out;
+  min-width: 200px;
+}
+
+@keyframes contextMenuAppear {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.context-menu-item:hover {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white !important;
+}
+
+.context-menu-icon {
+  font-size: 1.1rem;
+  width: 20px;
+  text-align: center;
+}
+
+.context-menu-label {
+  flex: 1;
+}
