@@ -598,63 +598,168 @@
   </main>
 
   <!-- Barre latérale contextuelle des détails personne -->
+  <!-- Barre latérale contextuelle des détails personne -->
   <aside class="context-sidebar" [class.visible]="selectedPerson">
     <div *ngIf="selectedPerson" class="sidebar-content">
-      <div class="sidebar-header">
-        <h3>
-          <span class="header-icon">📋</span>
-          Détails du membre
-        </h3>
+      <!-- En-tête avec fond coloré -->
+      <div class="sidebar-header" [class]="selectedPerson.genre === 'homme' ? 'header-man' : 'header-woman'">
+        <div class="header-content">
+          <h3>
+            <span class="header-icon">📋</span>
+            Détails du membre
+          </h3>
+          <p class="header-subtitle">{{ selectedPerson.prenom }} {{ selectedPerson.nom }}</p>
+        </div>
         <div class="header-actions">
-          <button (click)="openEditPersonModal(selectedPerson)" class="sidebar-btn" title="Modifier">
-            ✏️
+          <button (click)="openEditPersonModal(selectedPerson)" class="header-btn" title="Modifier">
+            <span class="btn-icon">✏️</span>
+            Modifier
           </button>
-          <button (click)="selectedPerson = null" class="sidebar-btn sidebar-close" title="Fermer">
+          <button (click)="selectedPerson = null" class="header-btn header-close" title="Fermer">
             ✕
           </button>
         </div>
       </div>
 
       <div class="person-details">
-        <!-- En-tête personne -->
-        <div class="person-header">
-          <div [class]="'person-avatar ' + (selectedPerson.genre === 'homme' ? 'avatar-man' : 'avatar-woman')">
-            <span class="avatar-initials">{{ getPersonDetails(selectedPerson).initials }}</span>
-            <span class="avatar-badge">{{ selectedPerson.genre === 'homme' ? '👨' : '👩' }}</span>
+        <!-- Carte profil avec photo/avatar -->
+        <div class="profile-card">
+          <div class="profile-avatar" [class]="selectedPerson.genre === 'homme' ? 'avatar-man' : 'avatar-woman'">
+            <div *ngIf="!selectedPerson.photo" class="avatar-initials">
+              {{ getPersonDetails(selectedPerson).initials }}
+            </div>
+            <img *ngIf="selectedPerson.photo"
+                 [src]="selectedPerson.photo"
+                 [alt]="selectedPerson.prenom + ' ' + selectedPerson.nom"
+                 class="avatar-photo">
+            <div class="avatar-badge">
+              {{ selectedPerson.genre === 'homme' ? '👨' : '👩' }}
+            </div>
           </div>
-          <div class="person-info">
-            <h4>{{ selectedPerson.prenom }} {{ selectedPerson.nom }}</h4>
-            <div class="person-tags">
-              <span class="tag">Génération {{ getPersonGeneration(selectedPerson) + 1 }}</span>
-              <span class="tag tag-id">ID: {{ selectedPerson.id }}</span>
+
+          <div class="profile-info">
+            <h4 class="profile-name">{{ selectedPerson.prenom }} {{ selectedPerson.nom }}</h4>
+            <div class="profile-meta">
+            <span class="meta-badge generation-badge">
+              <span class="meta-icon">🌳</span>
+              Génération {{ getPersonGeneration(selectedPerson) + 1 }}
+            </span>
+              <span class="meta-badge id-badge">
+              <span class="meta-icon">🆔</span>
+              ID: {{ selectedPerson.id }}
+            </span>
+            </div>
+
+            <!-- Métriques rapides -->
+            <div class="profile-stats">
+              <div class="stat-item">
+                <div class="stat-icon">👶</div>
+                <div class="stat-details">
+                  <div class="stat-value">{{ selectedPerson.children?.length || 0 }}</div>
+                  <div class="stat-label">Enfants</div>
+                </div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-icon">🎂</div>
+                <div class="stat-details">
+                  <div class="stat-value">{{ getAgeFromDate(selectedPerson.dateNaissance) || '?' }}</div>
+                  <div class="stat-label">Âge</div>
+                </div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-icon">💼</div>
+                <div class="stat-details">
+                  <div class="stat-value">{{ selectedPerson.profession ? 'Oui' : 'Non' }}</div>
+                  <div class="stat-label">Profession</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Contact -->
+        <!-- Actions principales avec boutons colorés -->
+        <div class="quick-actions-section">
+          <h5 class="section-title">
+            <span class="section-icon">⚡</span>
+            Actions rapides
+          </h5>
+          <div class="actions-grid">
+            <button (click)="openAddPersonModal(selectedPerson)" class="action-btn btn-primary">
+              <span class="action-icon">👶</span>
+              <span class="action-text">Ajouter un enfant</span>
+              <span class="action-arrow">→</span>
+            </button>
+
+            <button (click)="openEditPersonModal(selectedPerson)" class="action-btn btn-secondary">
+              <span class="action-icon">✏️</span>
+              <span class="action-text">Modifier</span>
+              <span class="action-arrow">→</span>
+            </button>
+
+            <button (click)="downloadPersonPhoto(selectedPerson)"
+                    [disabled]="!selectedPerson.photo"
+                    class="action-btn btn-success">
+              <span class="action-icon">📥</span>
+              <span class="action-text">Télécharger photo</span>
+              <span class="action-arrow">→</span>
+            </button>
+
+            <button (click)="sharePerson(selectedPerson)" class="action-btn btn-info">
+              <span class="action-icon">↗️</span>
+              <span class="action-text">Partager</span>
+              <span class="action-arrow">→</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Informations de contact -->
         <div class="contact-section" *ngIf="selectedPerson.telephone || selectedPerson.email || selectedPerson.adresse">
-          <h5 class="section-title">Contact</h5>
+          <h5 class="section-title">
+            <span class="section-icon">📞</span>
+            Contact
+          </h5>
           <div class="contact-list">
             <div *ngIf="selectedPerson.telephone" class="contact-item">
-              <span class="contact-icon">📱</span>
+              <div class="contact-icon-wrapper phone">
+                <span class="contact-icon">📱</span>
+              </div>
               <div class="contact-details">
                 <span class="contact-label">Téléphone</span>
-                <span class="contact-value">{{ selectedPerson.telephone }}</span>
+                <a [href]="'tel:' + selectedPerson.telephone" class="contact-value">
+                  {{ selectedPerson.telephone }}
+                </a>
               </div>
+              <button (click)="copyToClipboard(selectedPerson.telephone)" class="contact-action" title="Copier">
+                📋
+              </button>
             </div>
+
             <div *ngIf="selectedPerson.email" class="contact-item">
-              <span class="contact-icon">📧</span>
+              <div class="contact-icon-wrapper email">
+                <span class="contact-icon">📧</span>
+              </div>
               <div class="contact-details">
                 <span class="contact-label">Email</span>
-                <span class="contact-value">{{ selectedPerson.email }}</span>
+                <a [href]="'mailto:' + selectedPerson.email" class="contact-value">
+                  {{ selectedPerson.email }}
+                </a>
               </div>
+              <button (click)="copyToClipboard(selectedPerson.email)" class="contact-action" title="Copier">
+                📋
+              </button>
             </div>
+
             <div *ngIf="selectedPerson.adresse" class="contact-item">
-              <span class="contact-icon">📍</span>
+              <div class="contact-icon-wrapper address">
+                <span class="contact-icon">📍</span>
+              </div>
               <div class="contact-details">
                 <span class="contact-label">Adresse</span>
                 <span class="contact-value">{{ selectedPerson.adresse }}</span>
               </div>
+              <button (click)="openMap(selectedPerson.adresse)" class="contact-action" title="Voir sur carte">
+                🗺️
+              </button>
             </div>
           </div>
         </div>
@@ -668,13 +773,20 @@
               Enfants ({{ selectedPerson.children.length }})
             </h5>
             <div class="children-list">
-              <div *ngFor="let child of selectedPerson.children" class="child-item">
-                <div class="child-avatar">{{ child.prenom.charAt(0) }}{{ child.nom.charAt(0) }}</div>
+              <div *ngFor="let child of selectedPerson.children"
+                   class="child-item"
+                   (click)="selectedPerson = child">
+                <div class="child-avatar" [class]="child.genre === 'homme' ? 'child-boy' : 'child-girl'">
+                  {{ child.prenom.charAt(0) }}{{ child.nom.charAt(0) }}
+                </div>
                 <div class="child-info">
                   <span class="child-name">{{ child.prenom }} {{ child.nom }}</span>
-                  <span class="child-gender">{{ child.genre === 'homme' ? '👦' : '👧' }}</span>
+                  <div class="child-meta">
+                    <span class="child-gender">{{ child.genre === 'homme' ? '👦' : '👧' }}</span>
+                    <span class="child-age">{{ getAgeFromDate(child.dateNaissance) || '?' }} ans</span>
+                  </div>
                 </div>
-                <button (click)="selectedPerson = child" class="child-action" title="Voir">
+                <button class="child-action" title="Voir">
                   👁️
                 </button>
               </div>
@@ -687,31 +799,42 @@
               <span class="section-icon">👤</span>
               Parent
             </h5>
-            <div class="parent-item">
-              <span class="parent-name">{{ getParentName(selectedPerson.parentId) }}</span>
-              <button
-                (click)="navigateToParent(selectedPerson.parentId)"
-                class="parent-action"
-                title="Voir le parent"
-              >
+            <div class="parent-item" (click)="navigateToParent(selectedPerson.parentId)">
+              <div class="parent-avatar">👨‍👩‍👦</div>
+              <div class="parent-info">
+                <span class="parent-name">{{ getParentName(selectedPerson.parentId) }}</span>
+                <span class="parent-relation">Parent</span>
+              </div>
+              <button class="parent-action" title="Voir le parent">
                 ↗️
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Actions rapides -->
-        <div class="quick-actions">
-          <button (click)="openAddPersonModal(selectedPerson)" class="btn-quick-action">
-            <span class="action-icon">➕</span>
-            Ajouter un enfant
+        <!-- Notes -->
+        <div *ngIf="selectedPerson.notes" class="notes-section">
+          <h5 class="section-title">
+            <span class="section-icon">📝</span>
+            Notes
+          </h5>
+          <div class="notes-content">
+            {{ selectedPerson.notes }}
+          </div>
+        </div>
+
+        <!-- Boutons d'action secondaires -->
+        <div class="secondary-actions">
+          <button (click)="duplicatePerson(selectedPerson)" class="secondary-btn btn-warning">
+            <span class="btn-icon">⎘</span>
+            Dupliquer
           </button>
-          <button (click)="openEditPersonModal(selectedPerson)" class="btn-quick-action">
-            <span class="action-icon">✏️</span>
-            Modifier
+          <button (click)="exportPersonData(selectedPerson)" class="secondary-btn btn-info">
+            <span class="btn-icon">📄</span>
+            Exporter fiche
           </button>
-          <button (click)="deletePerson(selectedPerson.id)" class="btn-quick-action btn-danger">
-            <span class="action-icon">🗑️</span>
+          <button (click)="deletePerson(selectedPerson.id)" class="secondary-btn btn-danger">
+            <span class="btn-icon">🗑️</span>
             Supprimer
           </button>
         </div>

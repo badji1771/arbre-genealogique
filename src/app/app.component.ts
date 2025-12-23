@@ -1059,4 +1059,66 @@ export class AppComponent implements OnInit {
       document.addEventListener('click', closeMenu);
     }, 100);
   }
+
+  // Méthodes utilitaires pour la sidebar
+  getAgeFromDate(date?: Date): number | null {
+    if (!date) return null;
+
+    const birthDate = new Date(date);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+
+    return age;
+  }
+
+  copyToClipboard(text: string): void {
+    navigator.clipboard.writeText(text).then(() => {
+      this.showToast('Copié dans le presse-papier', 'success', '📋');
+    }).catch(() => {
+      this.showToast('Erreur lors de la copie', 'error', '❌');
+    });
+  }
+
+  openMap(address: string): void {
+    const encodedAddress = encodeURIComponent(address);
+    window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
+  }
+
+  sharePerson(person: Person): void {
+    const shareData = {
+      title: `${person.prenom} ${person.nom} - Arbre Généalogique`,
+      text: `Découvrez ${person.prenom} ${person.nom} dans l'arbre généalogique`,
+      url: window.location.href
+    };
+
+    if (navigator.share) {
+      navigator.share(shareData)
+        .then(() => this.showToast('Partage réussi', 'success', '✅'))
+        .catch(() => this.showToast('Partage annulé', 'info', 'ℹ️'));
+    } else {
+      this.copyToClipboard(window.location.href);
+    }
+  }
+
+  duplicatePerson(person: Person): void {
+    // Logique de duplication
+    this.showToast('Duplication (fonctionnalité à venir)', 'info', '⎘');
+  }
+
+  exportPersonData(person: Person): void {
+    // Logique d'export de fiche personnelle
+    const data = JSON.stringify(person, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${person.prenom}_${person.nom}_fiche.json`;
+    a.click();
+    this.showToast('Fiche exportée', 'success', '📄');
+  }
 }
