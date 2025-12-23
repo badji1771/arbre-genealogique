@@ -298,42 +298,112 @@
               <span class="crumb active">{{ selectedFamily.name }}</span>
             </div>
 
+            <!-- Dans la section header-actions du family-header -->
             <div class="header-actions">
-              <button
-                (click)="openAddPersonModal()"
-                class="btn-action-primary"
-              >
-                <span class="btn-icon">👤</span>
-                Ajouter un membre
-              </button>
-
-              <div class="dropdown">
-                <button class="btn-action-secondary">
-                  <span class="btn-icon">📋</span>
-                  Actions
+              <!-- Bouton Ajouter un membre amélioré -->
+              <div class="add-member-container">
+                <button
+                  (click)="openAddPersonModal()"
+                  class="btn-add-member"
+                >
+                  <div class="btn-add-content">
+                    <span class="btn-add-icon">👤</span>
+                    <div class="btn-add-text">
+                      <span class="btn-add-title">Ajouter un membre</span>
+                      <span class="btn-add-subtitle">Cliquez pour ajouter</span>
+                    </div>
+                    <span class="btn-add-arrow">➕</span>
+                  </div>
+                  <div class="btn-add-glow"></div>
                 </button>
-                <div class="dropdown-content">
-                  <button (click)="exportCurrentFamily()" class="dropdown-item">
-                    <span class="item-icon">📤</span>
-                    Exporter cette famille
+
+                <!-- Menu rapide d'ajout (optionnel) -->
+                <div class="quick-add-menu">
+                  <button (click)="openAddPersonModal()" class="quick-add-item">
+                    <span class="quick-add-icon">👤</span>
+                    <span class="quick-add-label">Personne seule</span>
                   </button>
-                  <button (click)="duplicateFamily()" class="dropdown-item">
-                    <span class="item-icon">⎘</span>
-                    Dupliquer
+                  <button (click)="openAddPersonModal()" class="quick-add-item">
+                    <span class="quick-add-icon">👨‍👩‍👧‍👦</span>
+                    <span class="quick-add-label">Famille</span>
                   </button>
-                  <button (click)="shareFamily()" class="dropdown-item">
-                    <span class="item-icon">↗️</span>
-                    Partager
+                  <button (click)="openAddPersonModal()" class="quick-add-item">
+                    <span class="quick-add-icon">👶</span>
+                    <span class="quick-add-label">Enfant</span>
                   </button>
-                  <div class="dropdown-divider"></div>
-                  <button (click)="editFamily()" class="dropdown-item">
-                    <span class="item-icon">✏️</span>
-                    Modifier
-                  </button>
-                  <button (click)="deleteFamily()" class="dropdown-item dangerous">
-                    <span class="item-icon">🗑️</span>
-                    Supprimer
-                  </button>
+                </div>
+              </div>
+
+              <!-- Bouton Actions amélioré -->
+              <div class="actions-container">
+                <button class="btn-actions">
+                  <div class="btn-actions-content">
+                    <span class="btn-actions-icon">⚡</span>
+                    <span class="btn-actions-text">Actions</span>
+                    <span class="btn-actions-arrow">▼</span>
+                  </div>
+                </button>
+
+                <div class="actions-dropdown">
+                  <div class="dropdown-header">
+                    <span class="dropdown-icon">📋</span>
+                    <span class="dropdown-title">Actions rapides</span>
+                  </div>
+
+                  <div class="dropdown-section">
+                    <h6 class="section-title">Export</h6>
+                    <button (click)="exportCurrentFamily()" class="dropdown-item">
+                      <span class="item-icon">📊</span>
+                      <span class="item-text">Exporter Excel</span>
+                      <span class="item-badge">Nouveau</span>
+                    </button>
+                    <button (click)="exportToJson()" class="dropdown-item">
+                      <span class="item-icon">💾</span>
+                      <span class="item-text">Exporter JSON</span>
+                    </button>
+                    <button (click)="exportStatistics()" class="dropdown-item">
+                      <span class="item-icon">📈</span>
+                      <span class="item-text">Statistiques</span>
+                    </button>
+                  </div>
+
+                  <div class="dropdown-section">
+                    <h6 class="section-title">Gestion</h6>
+                    <button (click)="duplicateFamily()" class="dropdown-item">
+                      <span class="item-icon">⎘</span>
+                      <span class="item-text">Dupliquer famille</span>
+                    </button>
+                    <button (click)="shareFamily()" class="dropdown-item">
+                      <span class="item-icon">↗️</span>
+                      <span class="item-text">Partager</span>
+                      <span class="item-badge">Pro</span>
+                    </button>
+                    <button (click)="createBackup()" class="dropdown-item">
+                      <span class="item-icon">💾</span>
+                      <span class="item-text">Sauvegarder</span>
+                    </button>
+                  </div>
+
+                  <div class="dropdown-section">
+                    <h6 class="section-title">Avancé</h6>
+                    <button (click)="openJsonManager()" class="dropdown-item">
+                      <span class="item-icon">📁</span>
+                      <span class="item-text">Gestion JSON</span>
+                    </button>
+                    <button (click)="importFromGedcom()" class="dropdown-item">
+                      <span class="item-icon">📤</span>
+                      <span class="item-text">Importer GEDCOM</span>
+                    </button>
+                    <button (click)="clearAllData()" class="dropdown-item dropdown-danger">
+                      <span class="item-icon">🗑️</span>
+                      <span class="item-text">Tout effacer</span>
+                    </button>
+                  </div>
+
+                  <div class="dropdown-footer">
+                    <span class="footer-text">Version 2.0</span>
+                    <span class="footer-stats">{{ families.length }} familles</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -375,56 +445,148 @@
         </div>
 
         <!-- Vues de l'arbre -->
-        <div class="view-selector">
-          <div class="view-tabs">
-            <button
-              class="view-tab"
-              [class.active]="currentView === 'tree'"
-              (click)="setView('tree')"
-              data-view="tree"
-            >
-              <span class="tab-icon">🌳</span>
-              Vue arbre
-            </button>
-            <button
-              class="view-tab"
-              [class.active]="currentView === 'list'"
-              (click)="setView('list')"
-              data-view="list"
-            >
-              <span class="tab-icon">📋</span>
-              Vue liste
-            </button>
-            <button
-              class="view-tab"
-              [class.active]="currentView === 'timeline'"
-              (click)="setView('timeline')"
-              data-view="timeline"
-            >
-              <span class="tab-icon">📅</span>
-              Chronologie
-            </button>
-            <button
-              class="view-tab"
-              [class.active]="currentView === 'map'"
-              (click)="setView('map')"
-              data-view="map"
-            >
-              <span class="tab-icon">🗺️</span>
-              Carte
-            </button>
-          </div>
+        <!-- Remplacez la section view-controls dans le template HTML -->
+        <div class="view-controls-container">
+          <div class="view-selector-group">
+            <!-- Sélecteur de vue principal -->
+            <div class="view-picker">
+              <span class="view-picker-label">Vue :</span>
+              <div class="view-picker-buttons">
+                <button
+                  class="view-picker-btn"
+                  [class.active]="currentView === 'tree'"
+                  (click)="setView('tree')"
+                  data-view="tree"
+                  title="Vue arbre classique"
+                >
+                  <span class="view-icon">🌳</span>
+                  <span class="view-label">Arbre</span>
+                  <span class="view-badge" *ngIf="getVisibleLevelsCount()">
+            {{ getVisibleLevelsCount() }}
+          </span>
+                </button>
 
-          <div class="view-controls">
-            <button class="btn-control" (click)="expandAll()" title="Tout développer">
-              <span class="control-icon">⬇️</span>
-            </button>
-            <button class="btn-control" (click)="collapseAll()" title="Tout réduire">
-              <span class="control-icon">➡️</span>
-            </button>
-            <button class="btn-control" (click)="toggleViewMode()" title="Changer de vue">
-              <span class="control-icon">🔄</span>
-            </button>
+                <button
+                  class="view-picker-btn"
+                  [class.active]="currentView === 'list'"
+                  (click)="setView('list')"
+                  data-view="list"
+                  title="Vue liste des membres"
+                >
+                  <span class="view-icon">📋</span>
+                  <span class="view-label">Liste</span>
+                  <span class="view-badge">{{ getAllMembersFlat().length }}</span>
+                </button>
+
+                <button
+                  class="view-picker-btn coming-soon"
+                  [class.active]="currentView === 'timeline'"
+                  (click)="setView('timeline')"
+                  data-view="timeline"
+                  title="Vue chronologique (bientôt)"
+                >
+                  <span class="view-icon">📅</span>
+                  <span class="view-label">Chronologie</span>
+                  <span class="view-badge">🚧</span>
+                </button>
+
+                <button
+                  class="view-picker-btn coming-soon"
+                  [class.active]="currentView === 'map'"
+                  (click)="setView('map')"
+                  data-view="map"
+                  title="Vue carte géographique (bientôt)"
+                >
+                  <span class="view-icon">🗺️</span>
+                  <span class="view-label">Carte</span>
+                  <span class="view-badge">🚧</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Contrôles d'expansion/contraction -->
+            <!-- Remplacez la section expansion-controls par ceci -->
+            <div class="expansion-controls">
+              <!-- Groupe compact pour les deux boutons -->
+              <div class="expansion-group compact">
+                <button
+                  class="expansion-btn btn-expand-all"
+                  (click)="expandAll()"
+                  [disabled]="!selectedFamily || selectedFamily.members.length === 0"
+                  title="Tout développer (Ctrl + E)"
+                >
+                  <div class="expansion-icon">
+                    <svg class="expand-svg" viewBox="0 0 24 24">
+                      <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/>
+                      <path d="M0 0h24v24H0z" fill="none"/>
+                    </svg>
+                  </div>
+                  <span class="expansion-label">Ouvrir tout</span>
+                </button>
+
+                <button
+                  class="expansion-btn btn-collapse-all"
+                  (click)="collapseAll()"
+                  [disabled]="!selectedFamily || selectedFamily.members.length === 0"
+                  title="Tout réduire (Ctrl + C)"
+                >
+                  <div class="expansion-icon">
+                    <svg class="collapse-svg" viewBox="0 0 24 24">
+                      <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
+                      <path d="M0 0h24v24H0z" fill="none"/>
+                    </svg>
+                  </div>
+                  <span class="expansion-label">Fermer tout</span>
+                </button>
+              </div>
+
+              <!-- Indicateur d'état (optionnel, peut être déplacé) -->
+              <div class="expansion-state" *ngIf="selectedFamily">
+                <div class="state-indicator">
+                  <div class="state-bar">
+                    <div class="state-fill" [style.width.%]="getExpansionProgress()"></div>
+                  </div>
+                  <span class="state-text">
+        {{ getExpandedLevelsCount() }}/{{ maxLevel + 1 }} générations
+      </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Options rapides pour l'arbre -->
+            <div class="quick-controls" *ngIf="currentView === 'tree' && selectedFamily">
+              <button
+                class="quick-btn"
+                (click)="toggleShowAllGenerations()"
+                [class.active]="showAllGenerations"
+                title="Basculer l'affichage des générations"
+              >
+                <span class="quick-icon">{{ showAllGenerations ? '👁️' : '👁️‍🗨️' }}</span>
+                <span class="quick-label">
+          {{ showAllGenerations ? 'Toutes' : 'Sélectives' }}
+        </span>
+              </button>
+
+              <button
+                class="quick-btn"
+                (click)="scrollToGeneration(0)"
+                [disabled]="!hasMembersInLevel(0)"
+                title="Aller aux fondateurs"
+              >
+                <span class="quick-icon">👑</span>
+                <span class="quick-label">Fondateurs</span>
+              </button>
+
+              <button
+                class="quick-btn"
+                (click)="scrollToGeneration(maxLevel)"
+                [disabled]="!hasMembersInLevel(maxLevel)"
+                title="Aller à la dernière génération"
+              >
+                <span class="quick-icon">👶</span>
+                <span class="quick-label">Dernière</span>
+              </button>
+            </div>
           </div>
         </div>
 

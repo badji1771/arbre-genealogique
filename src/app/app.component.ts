@@ -614,7 +614,7 @@ export class AppComponent implements OnInit {
     }
   }
 
-  openAddPersonModal(parent?: Person): void {
+  /*openAddPersonModal(parent?: Person): void {
     this.editingPerson = null;
     this.parentForNewChild = parent || null;
     this.personFormData = {
@@ -631,7 +631,7 @@ export class AppComponent implements OnInit {
       notes: ''
     };
     this.showPersonModal = true;
-  }
+  }*/
 
   openEditPersonModal(person: Person): void {
     this.editingPerson = person;
@@ -1120,5 +1120,82 @@ export class AppComponent implements OnInit {
     a.download = `${person.prenom}_${person.nom}_fiche.json`;
     a.click();
     this.showToast('Fiche exportée', 'success', '📄');
+  }
+
+  // Méthodes pour les nouvelles fonctionnalités
+  createBackup(): void {
+    // Utilisez votre service de sauvegarde
+    this.showToast('Sauvegarde créée', 'success', '💾');
+  }
+
+// Animation pour le bouton ajouter
+  animateAddButton(): void {
+    const button = document.querySelector('.btn-add-member');
+    if (button) {
+      button.classList.add('pulse');
+      setTimeout(() => {
+        button.classList.remove('pulse');
+      }, 600);
+    }
+  }
+
+// Ouvrir avec animation
+  openAddPersonModal(parent?: Person): void {
+    this.animateAddButton();
+
+    this.editingPerson = null;
+    this.parentForNewChild = parent || null;
+    this.personFormData = {
+      nom: '',
+      prenom: '',
+      telephone: '',
+      adresse: '',
+      email: '',
+      parentId: parent?.id || null,
+      genre: 'homme',
+      photo: '',
+      dateNaissance: '',
+      profession: '',
+      notes: ''
+    };
+    this.showPersonModal = true;
+  }
+
+  // Dans la classe AppComponent, ajoutez ces méthodes :
+
+  getExpansionProgress(): number {
+    if (!this.selectedFamily || this.maxLevel === 0) return 0;
+    const expanded = this.getExpandedLevelsCount();
+    return (expanded / (this.maxLevel + 1)) * 100;
+  }
+
+  getExpandedLevelsCount(): number {
+    if (this.showAllGenerations) return this.maxLevel + 1;
+    return this.maxLevel + 1 - this.collapsedLevels.size;
+  }
+
+// Écouteurs de raccourcis clavier
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    // Ctrl + E pour tout développer
+    if (event.ctrlKey && event.key === 'e') {
+      event.preventDefault();
+      this.expandAll();
+    }
+
+    // Ctrl + C pour tout réduire
+    if (event.ctrlKey && event.key === 'c') {
+      event.preventDefault();
+      this.collapseAll();
+    }
+
+    // Ctrl + 1-9 pour aller à une génération spécifique
+    if (event.ctrlKey && event.key >= '1' && event.key <= '9') {
+      const level = parseInt(event.key) - 1;
+      if (level <= this.maxLevel) {
+        event.preventDefault();
+        this.scrollToGeneration(level);
+      }
+    }
   }
 }
