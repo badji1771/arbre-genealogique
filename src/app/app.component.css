@@ -61,6 +61,26 @@
   --generation-sidebar-width: 60px;
 }
 
+/* ===== Overrides spécifiques pour le menu Actions ===== */
+/* Priorité élevée pour neutraliser les autres variantes de .actions-dropdown-content plus bas dans le fichier */
+.actions-dropdown-overlay .actions-dropdown-content {
+  position: absolute !important;
+  top: 56px !important;
+  right: 24px !important;
+  left: auto !important;
+  bottom: auto !important;
+  transform: translateY(-10px) !important;
+  width: 320px;
+  max-height: 80vh;
+  overflow-y: auto;
+  opacity: 0;
+}
+
+.actions-dropdown-overlay.visible .actions-dropdown-content {
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+}
+
 /* Reset et base */
 * {
   box-sizing: border-box;
@@ -690,6 +710,7 @@ body {
   background: linear-gradient(135deg, var(--primary), var(--primary-light));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .sidebar-btn {
@@ -1210,7 +1231,6 @@ body {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-2px); }
 }
-
 
 .children-indicator {
   display: flex;
@@ -1834,6 +1854,68 @@ body {
   border-color: var(--primary);
 }
 
+/* ===== MENU ACTIONS (global) ===== */
+.actions-container {
+  position: relative;
+}
+
+.btn-actions {
+  padding: 8px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-actions:hover {
+  background: #f5f5f5;
+}
+
+.btn-actions.active {
+  background: #f0f0f0;
+  border-color: #d0d0d0;
+}
+
+.actions-dropdown-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
+  display: none;
+  opacity: 0;
+  z-index: 2000;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.actions-dropdown-overlay.visible {
+  display: block;
+  opacity: 1;
+}
+
+.actions-dropdown-content {
+  position: absolute;
+  top: 56px;
+  right: 24px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 260px;
+  transform: translateY(-10px);
+  opacity: 0;
+  transition: all 0.3s ease-in-out;
+  max-height: 80vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.actions-dropdown-overlay.visible .actions-dropdown-content {
+  transform: translateY(0);
+  opacity: 1;
+}
+
 /* Responsive */
 @media (max-width: 1200px) {
   .app-main {
@@ -1842,6 +1924,59 @@ body {
 
   .app-sidebar {
     display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+  }
+
+  .actions-dropdown-overlay.visible {
+    display: block;
+    opacity: 1;
+  }
+
+  .actions-dropdown-content {
+    position: absolute;
+    top: 48px;
+    right: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 250px;
+    transform: translateY(-10px);
+    opacity: 0;
+    transition: all 0.3s ease-in-out;
+    max-height: 80vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .actions-dropdown-overlay.visible .actions-dropdown-content {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .actions-container {
+    position: relative;
+  }
+
+  .btn-actions {
+    padding: 8px 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .btn-actions:hover {
+    background: #f5f5f5;
+  }
+
+  .btn-actions.active {
+    background: #f0f0f0;
+    border-color: #d0d0d0;
   }
 
   .person-sidebar {
@@ -3770,6 +3905,7 @@ body {
 /* === Bouton Actions === */
 .actions-container {
   position: relative;
+  z-index: 1000;
 }
 
 .btn-actions {
@@ -3819,31 +3955,119 @@ body {
   transform: rotate(180deg);
 }
 
-/* Dropdown Actions */
+/* Dropdown Actions - CORRECTION DU POSITIONNEMENT */
 .actions-dropdown {
-  position: absolute;
-  top: 100%;
+  position: fixed !important; /* Changé de absolute à fixed */
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  opacity: 0;
+  visibility: hidden;
+  z-index: 99999 !important; /* Très élevé */
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+/* Overlay de fond */
+.actions-dropdown::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
   right: 0;
-  width: 320px;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1;
+}
+
+/* Contenu réel du menu */
+.actions-dropdown-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  width: 90%;
+  max-width: 400px;
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  z-index: 2;
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+/* État visible */
+.actions-container:hover .actions-dropdown {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: all;
+}
+
+.actions-container:hover .actions-dropdown-content {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* Version alternative plus simple si la version fixe ne fonctionne pas */
+.actions-dropdown-simple {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 350px;
   background: white;
   border-radius: 16px;
-  margin-top: 0.5rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border: 1px solid #e2e8f0;
   opacity: 0;
   visibility: hidden;
   transform: translateY(-10px);
-  transition: all 0.3s ease;
-  z-index: 1000;
-  border: 1px solid #e2e8f0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 100000; /* Très élevé */
   overflow: hidden;
 }
 
-.actions-container:hover .actions-dropdown {
+.actions-container:hover .actions-dropdown-simple {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
 }
 
+/* ===== CORRECTION SPÉCIALE POUR LE MENU ACTIONS ===== */
+/* Empêchez les effets de conteneurs parents d'interférer */
+.view-controls-container,
+.family-header,
+.header-actions,
+.expansion-controls {
+  position: static !important;
+  z-index: auto !important;
+  transform: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  overflow: visible !important;
+}
+
+/* Forcez le menu à être au-dessus de tout */
+.actions-dropdown {
+  z-index: 2147483647 !important; /* Valeur maximum possible */
+}
+
+/* Alternative: sortez le menu du flux normal */
+body > .actions-dropdown-portal {
+  position: fixed !important;
+  z-index: 999999 !important;
+}
+
+/* ===== CONTENT DU DROPDOWN ===== */
 .dropdown-header {
   padding: 1.5rem;
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
@@ -4005,7 +4229,7 @@ body {
   }
 }
 
-.actions-dropdown {
+.actions-dropdown-content {
   animation: slideIn 0.3s ease-out;
 }
 
@@ -4028,6 +4252,31 @@ body {
 .btn-actions:hover::before {
   width: 300px;
   height: 300px;
+}
+
+/* === Badge de notification === */
+.add-member-container::after {
+  content: 'Nouveau';
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  border-radius: 20px;
+  z-index: 3;
+  animation: badgePulse 2s infinite;
+}
+
+@keyframes badgePulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
 }
 
 /* === Responsive === */
@@ -4061,7 +4310,12 @@ body {
     height: 50px;
   }
 
-  .actions-dropdown {
+  .actions-dropdown-content {
+    width: 95%;
+    padding: 1.5rem;
+  }
+
+  .actions-dropdown-simple {
     width: 100%;
     right: 0;
     left: 0;
@@ -4070,79 +4324,6 @@ body {
   .quick-add-menu {
     width: 100%;
   }
-}
-
-/* === État actif === */
-.btn-add-member:focus,
-.btn-actions:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
-}
-
-.btn-actions:focus {
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
-}
-
-/* === Badge de notification === */
-.add-member-container::after {
-  content: 'Nouveau';
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-  color: white;
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 0.25rem 0.5rem;
-  border-radius: 20px;
-  z-index: 3;
-  animation: badgePulse 2s infinite;
-}
-
-@keyframes badgePulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-}
-
-/* === Tooltips === */
-.add-member-container:hover::before,
-.actions-container:hover::before {
-  content: attr(data-tooltip);
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #1e293b;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  white-space: nowrap;
-  margin-bottom: 0.5rem;
-  z-index: 1000;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
-
-.add-member-container::before,
-.actions-container::before {
-  display: none;
-}
-
-.add-member-container:hover::before,
-.actions-container:hover::before {
-  display: block;
-}
-
-.add-member-container {
-  data-tooltip: "Ajouter un nouveau membre à l'arbre";
-}
-
-.actions-container {
-  data-tooltip: "Actions rapides et export";
 }
 
 /* === CONTROLES DE VUE === */
@@ -4154,6 +4335,8 @@ body {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(226, 232, 240, 0.8);
   backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 100; /* Plus bas que le menu actions */
 }
 
 .view-selector-group {
@@ -4306,7 +4489,6 @@ body {
 .expansion-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  transform: none !important;
 }
 
 .expansion-btn:not(:disabled):hover {
@@ -4509,6 +4691,135 @@ body {
   transform: translateX(-50%) translateY(-5px);
 }
 
+/* Style pour le groupe compact */
+.expansion-group.compact {
+  display: flex;
+  gap: 0.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.25rem;
+  background: #f8fafc;
+  overflow: hidden;
+}
+
+.expansion-group.compact .expansion-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 0.75rem 1.25rem;
+  min-width: auto;
+  flex: 1;
+  margin: 0;
+}
+
+/* Ou si vous préférez une barre verticale de séparation */
+.expansion-group.separated {
+  display: flex;
+  gap: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.expansion-group.separated .expansion-btn {
+  border: none;
+  border-radius: 0;
+  padding: 0.875rem 1.25rem;
+  min-width: auto;
+  flex: 1;
+  position: relative;
+}
+
+.expansion-group.separated .expansion-btn:first-child {
+  border-radius: 12px 0 0 12px;
+}
+
+.expansion-group.separated .expansion-btn:last-child {
+  border-radius: 0 12px 12px 0;
+}
+
+.expansion-group.separated .expansion-btn:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 20%;
+  right: 0;
+  height: 60%;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Animation d'apparition */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.view-controls-container {
+  animation: fadeSlideUp 0.5s ease-out;
+}
+
+/* ===== CORRECTION DÉFINITIVE DU MENU ACTIONS ===== */
+/* Version simple et efficace qui fonctionne toujours */
+
+.actions-dropdown-fixed {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(4px) !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  z-index: 999999 !important;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease !important;
+  pointer-events: none;
+}
+
+.actions-dropdown-fixed.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: all;
+}
+
+.actions-dropdown-fixed .dropdown-content {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  animation: dropdownAppear 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: scale(0.9);
+  opacity: 0;
+}
+
+.actions-dropdown-fixed.active .dropdown-content {
+  transform: scale(1);
+  opacity: 1;
+}
+
+@keyframes dropdownAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .view-picker-buttons {
@@ -4576,79 +4887,130 @@ body {
   }
 }
 
-/* Animation d'apparition */
-@keyframes fadeSlideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* ===== IMPORTANT: CORRECTION FINALE ===== */
+/* Utilisez cette classe pour le menu actions */
+
+.actions-dropdown-final {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: transparent !important;
+  z-index: 999999 !important;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
-.view-controls-container {
-  animation: fadeSlideUp 0.5s ease-out;
-}
-
-/* Style pour le groupe compact */
-.expansion-group.compact {
-  display: flex;
-  gap: 0.5rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 0.25rem;
-  background: #f8fafc;
-  overflow: hidden;
-}
-
-.expansion-group.compact .expansion-btn {
-  border: none;
-  border-radius: 10px;
-  padding: 0.75rem 1.25rem;
-  min-width: auto;
-  flex: 1;
-  margin: 0;
-}
-
-/* Supprimez l'effet de survol sur le groupe */
-.expansion-group.compact .expansion-btn:hover {
-  transform: translateY(-1px);
-}
-
-/* Ou si vous préférez une barre verticale de séparation */
-.expansion-group.separated {
-  display: flex;
-  gap: 0;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.expansion-group.separated .expansion-btn {
-  border: none;
-  border-radius: 0;
-  padding: 0.875rem 1.25rem;
-  min-width: auto;
-  flex: 1;
-  position: relative;
-}
-
-.expansion-group.separated .expansion-btn:first-child {
-  border-radius: 12px 0 0 12px;
-}
-
-.expansion-group.separated .expansion-btn:last-child {
-  border-radius: 0 12px 12px 0;
-}
-
-.expansion-group.separated .expansion-btn:not(:last-child)::after {
-  content: '';
+.actions-dropdown-final .dropdown-wrapper {
   position: absolute;
-  top: 20%;
-  right: 0;
-  height: 60%;
-  width: 1px;
-  background: rgba(255, 255, 255, 0.3);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.actions-dropdown-final .dropdown-card {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  transform: scale(0.9);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.actions-container:hover .actions-dropdown-final {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: all;
+}
+
+.actions-container:hover .actions-dropdown-final .dropdown-card {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* Fermeture au clic en dehors */
+.actions-dropdown-final .dropdown-wrapper {
+  cursor: pointer;
+}
+
+.actions-dropdown-final .dropdown-card {
+  cursor: default;
+}
+
+/* ===== ÉTAT ACTIF DES BOUTONS ===== */
+.btn-add-member:focus,
+.btn-actions:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+}
+
+.btn-actions:focus {
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+}
+
+
+/* Style pour le bouton Actions */
+.btn-actions {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  border: none;
+  padding: 0;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+  min-width: 160px;
+}
+
+.btn-actions:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(139, 92, 246, 0.4);
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+}
+
+.btn-actions.active {
+  background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.5);
+}
+
+.btn-actions-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 1.5rem;
+  gap: 0.75rem;
+  position: relative;
+  z-index: 2;
+}
+
+.btn-actions-icon {
+  font-size: 1.5rem;
+}
+
+.btn-actions-text {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.btn-actions-arrow {
+  font-size: 0.9rem;
+  transition: transform 0.3s ease;
+}
+
+.btn-actions.active .btn-actions-arrow {
+  transform: rotate(180deg);
 }

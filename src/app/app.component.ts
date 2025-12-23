@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, ViewChild, HostListener,ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, HostListener, ChangeDetectorRef, AfterViewInit } from '@angular/core';
 import { FamilyTreeService } from './services/family-tree.service';
 import { ExcelExportService } from './services/excel-export.service';
 import { Family, Person } from './models/person.model';
@@ -7,9 +7,8 @@ import { PersonCardComponent } from './components/person-card/person-card.compon
 import { FamilySidebarComponent } from './components/family-sidebar/family-sidebar.component';
 import { PersonModalComponent } from './components/person-modal/person-modal.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import {JsonDatabaseService} from "./services/json-database.service";
-import {JsonManagerComponent} from "./components/json-manager/json-manager.component";
-
+import { JsonDatabaseService } from "./services/json-database.service";
+import { JsonManagerComponent } from "./components/json-manager/json-manager.component";
 
 interface Toast {
   id: number;
@@ -42,7 +41,7 @@ interface QuickOption {
   ],
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, AfterViewInit {
   // Données principales
   families: Family[] = [];
   selectedFamily: Family | null = null;
@@ -50,12 +49,19 @@ export class AppComponent implements OnInit {
 
   showJsonManager = false;
 
+  @ViewChild('globalDropdown') globalDropdown!: ElementRef;
+  @ViewChild('treeContainer') treeContainer!: ElementRef;
+
   // États d'affichage
   showPersonModal = false;
   showAddFamily = false;
   showAllGenerations = true;
   sidebarCollapsed = false; // Renommé pour correspondre au template
   currentView: 'tree' | 'list' | 'timeline' | 'map' = 'tree';
+
+  // Menu Actions
+  isActionsMenuOpen = false;
+  isHoverEnabled = true; // Pour basculer entre survol et clic
 
   // Données de formulaire
   editingPerson: Person | null = null;
@@ -97,9 +103,6 @@ export class AppComponent implements OnInit {
     }
   ];
 
-  @ViewChild('treeContainer') treeContainer!: ElementRef;
-
-
   personFormData = {
     nom: '',
     prenom: '',
@@ -115,8 +118,7 @@ export class AppComponent implements OnInit {
   };
 
   constructor(
-   // private familyTreeService: FamilyTreeService,
-   private jsonDb: JsonDatabaseService,
+    private jsonDb: JsonDatabaseService,
     private excelExportService: ExcelExportService,
     private cdr: ChangeDetectorRef
   ) {}
@@ -133,6 +135,245 @@ export class AppComponent implements OnInit {
       }, 1000);
     }
   }
+
+  ngAfterViewInit() {
+    // Initialisation après le rendu de la vue
+    setTimeout(() => {
+      this.cdr.detectChanges();
+    });
+  }
+
+  // ===== MÉTHODES DU MENU ACTIONS =====
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.isActionsMenuOpen) {
+      const target = event.target as HTMLElement;
+      const actionsButton = document.querySelector('.btn-actions');
+      const closeButton = document.querySelector('.dropdown-close-btn');
+      const dropdownContent = document.querySelector('.actions-dropdown-content');
+
+      // Fermer si on clique en dehors du menu
+      if (
+        !dropdownContent?.contains(target) &&
+        !actionsButton?.contains(target) &&
+        !closeButton?.contains(target)
+      ) {
+        this.closeActionsMenu();
+      }
+    }
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  onEscapeKey(event: KeyboardEvent): void {
+    if (this.isActionsMenuOpen) {
+      event.preventDefault();
+      this.closeActionsMenu();
+    }
+  }
+
+  // Basculer l'ouverture/fermeture du menu Actions
+  toggleActionsMenu(event?: MouseEvent): void {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+
+    console.log('toggleActionsMenu appelé, état actuel:', this.isActionsMenuOpen);
+
+    if (this.isActionsMenuOpen) {
+      this.closeActionsMenu();
+    } else {
+      this.openActionsMenu();
+    }
+
+    // Force la détection des changements
+    this.cdr.detectChanges();
+  }
+
+  // Ouvrir le menu Actions
+  openActionsMenu(): void {
+    console.log('Ouverture du menu Actions');
+
+    if (!this.isActionsMenuOpen) {
+      this.isActionsMenuOpen = true;
+      this.isHoverEnabled = false;
+
+      // Empêcher le défilement de la page
+      document.body.style.overflow = 'hidden';
+
+      // S'assurer que le menu est visible
+      setTimeout(() => {
+        this.cdr.detectChanges();
+
+        // Focus sur le bouton de fermeture pour l'accessibilité
+        setTimeout(() => {
+          const closeBtn = document.querySelector('.dropdown-close-btn') as HTMLElement;
+          if (closeBtn) {
+            closeBtn.focus();
+          }
+        }, 50);
+      }, 10);
+
+      this.showToast('Menu Actions ouvert', 'info', '📋');
+    }
+  }
+
+  // Fermer le menu Actions
+  closeActionsMenu(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+
+    if (this.isActionsMenuOpen) {
+      this.isActionsMenuOpen = false;
+      this.isHoverEnabled = true; // Réactiver le survol
+
+      // Restaurer le défilement
+      document.body.style.overflow = '';
+
+      this.showToast('Menu Actions fermé', 'info', '📋');
+    }
+  }
+
+  // Gestion du survol (optionnel - si vous voulez garder l'ouverture au survol)
+  onMouseEnterActions(): void {
+    if (this.isHoverEnabled && !this.isActionsMenuOpen) {
+      setTimeout(() => {
+        if (!this.isActionsMenuOpen) {
+          this.openActionsMenu();
+        }
+      }, 300);
+    }
+  }
+
+  onMouseLeaveActions(): void {
+    if (this.isHoverEnabled && this.isActionsMenuOpen) {
+      setTimeout(() => {
+        if (this.isActionsMenuOpen) {
+          this.closeActionsMenu();
+        }
+      }, 300);
+    }
+  }
+
+  // ===== MÉTHODES POUR LES ACTIONS DU MENU =====
+  exportCurrentFamily(): void {
+    if (this.selectedFamily) {
+      this.excelExportService.exportFamilyToExcel(this.selectedFamily);
+      this.showToast(`"${this.selectedFamily.name}" exportée en Excel`, 'success', '📊');
+      this.closeActionsMenu();
+    } else {
+      this.showToast('Veuillez sélectionner une famille d\'abord', 'warning', '⚠️');
+    }
+  }
+
+  exportToJson(): void {
+    if (this.selectedFamily) {
+      const dataStr = JSON.stringify([this.selectedFamily], null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+      const link = document.createElement('a');
+      link.setAttribute('href', dataUri);
+      link.setAttribute('download', `${this.selectedFamily.name}-${new Date().getTime()}.json`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      this.showToast(`"${this.selectedFamily.name}" exportée en JSON`, 'success', '💾');
+      this.closeActionsMenu();
+    } else {
+      this.showToast('Veuillez sélectionner une famille d\'abord', 'warning', '⚠️');
+    }
+  }
+
+  exportStatistics(): void {
+    if (this.families.length > 0) {
+      this.excelExportService.exportStatistics(this.families);
+      this.showToast('Statistiques exportées', 'success', '📈');
+      this.closeActionsMenu();
+    } else {
+      this.showToast('Aucune donnée à exporter', 'info', 'ℹ️');
+    }
+  }
+
+  duplicateFamilyAction(): void {
+    if (this.selectedFamily) {
+      const duplicated = this.jsonDb.duplicateFamily(this.selectedFamily.id);
+      if (duplicated) {
+        this.selectFamily(duplicated);
+        this.showToast('Famille dupliquée avec succès', 'success', '⎘');
+        this.closeActionsMenu();
+      }
+    } else {
+      this.showToast('Veuillez sélectionner une famille d\'abord', 'warning', '⚠️');
+    }
+  }
+
+  shareFamilyAction(): void {
+    if (this.selectedFamily) {
+      const shareData = {
+        title: `Arbre Généalogique - ${this.selectedFamily.name}`,
+        text: `Découvrez l'arbre généalogique de ${this.selectedFamily.name}`,
+        url: window.location.href
+      };
+
+      if (navigator.share) {
+        navigator.share(shareData)
+          .then(() => {
+            this.showToast('Partage réussi', 'success', '✅');
+            this.closeActionsMenu();
+          })
+          .catch(() => {
+            this.showToast('Partage annulé', 'info', 'ℹ️');
+          });
+      } else {
+        navigator.clipboard.writeText(window.location.href)
+          .then(() => {
+            this.showToast('Lien copié dans le presse-papier', 'success', '📋');
+            this.closeActionsMenu();
+          })
+          .catch(() => {
+            this.showToast('Impossible de copier le lien', 'error', '❌');
+          });
+      }
+    } else {
+      this.showToast('Veuillez sélectionner une famille d\'abord', 'warning', '⚠️');
+    }
+  }
+
+  createBackup(): void {
+    const backupData = JSON.stringify(this.families, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(backupData);
+    const link = document.createElement('a');
+    link.setAttribute('href', dataUri);
+    link.setAttribute('download', `sauvegarde-arbre-genealogique-${new Date().getTime()}.json`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    this.showToast('Sauvegarde créée avec succès', 'success', '💾');
+    this.closeActionsMenu();
+  }
+
+  openJsonManagerAction(): void {
+    this.showJsonManager = true;
+    this.showToast('Gestion JSON ouverte', 'info', '📁');
+    this.closeActionsMenu();
+  }
+
+  importFromGedcomAction(): void {
+    this.showToast('Import GEDCOM - Fonctionnalité à venir', 'info', '📤');
+    this.closeActionsMenu();
+  }
+
+  clearAllData(): void {
+    if (confirm('Êtes-vous sûr de vouloir effacer TOUTES les données ? Cette action est irréversible.')) {
+      this.jsonDb.clearAllData();
+      this.selectedFamily = null;
+      this.selectedPerson = null;
+      this.showToast('Toutes les données ont été effacées', 'warning', '🗑️');
+      this.closeActionsMenu();
+    }
+  }
+
+  // ===== MÉTHODES EXISTANTES (gardez tout le reste) =====
 
   // Chargement initial des familles
   loadFamilies(): void {
@@ -163,7 +404,7 @@ export class AppComponent implements OnInit {
         if (target.files[0].name.endsWith('.json')) {
           this.importFromJson(event);
         } else {
-          this.importFromGedcom();
+          this.importFromGedcomAction();
         }
       }
     };
@@ -275,28 +516,6 @@ export class AppComponent implements OnInit {
       'Affichage de toutes les générations' :
       'Affichage sélectif des générations';
     this.showToast(message, 'info', '🔄');
-  }
-
-  shareFamily(): void {
-    if (this.selectedFamily) {
-      // Créer un lien de partage
-      const shareData = {
-        title: `Arbre Généalogique - ${this.selectedFamily.name}`,
-        text: `Découvrez l'arbre généalogique de ${this.selectedFamily.name}`,
-        url: window.location.href
-      };
-
-      if (navigator.share) {
-        navigator.share(shareData)
-          .then(() => this.showToast('Partage réussi', 'success', '✅'))
-          .catch(() => this.showToast('Partage annulé', 'info', 'ℹ️'));
-      } else {
-        // Fallback pour les navigateurs qui ne supportent pas Web Share API
-        navigator.clipboard.writeText(window.location.href)
-          .then(() => this.showToast('Lien copié dans le presse-papier', 'success', '📋'))
-          .catch(() => this.showToast('Impossible de copier le lien', 'error', '❌'));
-      }
-    }
   }
 
   duplicateFamily(): void {
@@ -595,14 +814,15 @@ export class AppComponent implements OnInit {
     this.showToast(`Famille "${family.name}" sélectionnée`, 'success', '🏠');
   }
 
-  // Ajoutez cette méthode pour ouvrir le gestionnaire JSON
   openJsonManager(): void {
     this.showJsonManager = true;
-  }
-  closeJsonManager(): void {
-    this.showJsonManager = false;
+    this.showToast('Gestion JSON ouverte', 'info', '📁');
   }
 
+  closeJsonManager(): void {
+    this.showJsonManager = false;
+    this.showToast('Gestion JSON fermée', 'info', '📁');
+  }
 
   deletePerson(personId: number): void {
     if (this.selectedFamily && confirm('Êtes-vous sûr de vouloir supprimer cette personne et ses descendants ?')) {
@@ -613,25 +833,6 @@ export class AppComponent implements OnInit {
       this.showToast('Personne supprimée', 'warning', '🗑️');
     }
   }
-
-  /*openAddPersonModal(parent?: Person): void {
-    this.editingPerson = null;
-    this.parentForNewChild = parent || null;
-    this.personFormData = {
-      nom: '',
-      prenom: '',
-      telephone: '',
-      adresse: '',
-      email: '',
-      parentId: parent?.id || null,
-      genre: 'homme',
-      photo: '',
-      dateNaissance: '',
-      profession: '',
-      notes: ''
-    };
-    this.showPersonModal = true;
-  }*/
 
   openEditPersonModal(person: Person): void {
     this.editingPerson = person;
@@ -662,8 +863,6 @@ export class AppComponent implements OnInit {
     this.editingPerson = null;
     this.parentForNewChild = null;
   }
-
-
 
   // === MÉTHODES DE STATISTIQUES ===
   getTotalMembers(family: Family): number {
@@ -757,27 +956,12 @@ export class AppComponent implements OnInit {
   }
 
   // === MÉTHODES D'EXPORT/IMPORT ===
-  exportCurrentFamily(): void {
-    if (this.selectedFamily) {
-      this.excelExportService.exportFamilyToExcel(this.selectedFamily);
-      this.showToast(`${this.selectedFamily.name} exportée en Excel`, 'success', '📊');
-    }
-  }
-
   exportAllFamilies(): void {
     if (this.families.length > 0) {
       this.excelExportService.exportMultipleFamilies(this.families);
       this.showToast('Toutes les familles exportées', 'success', '📂');
     }
   }
-
-  exportStatistics(): void {
-    if (this.families.length > 0) {
-      this.excelExportService.exportStatistics(this.families);
-      this.showToast('Statistiques exportées', 'success', '📈');
-    }
-  }
-
 
   importFromJson(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -802,28 +986,6 @@ export class AppComponent implements OnInit {
       reader.readAsText(file);
     }
   }
-
-  clearAllData(): void {
-    if (confirm('Êtes-vous sûr de vouloir supprimer TOUTES les données ? Cette action est irréversible.')) {
-      this.jsonDb.clearAllData();
-      this.showToast('Toutes les données ont été effacées', 'warning', '🗑️');
-    }
-  }
-
-
-
-  exportToJson(): void {
-    const dataStr = JSON.stringify(this.families, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    const link = document.createElement('a');
-    link.setAttribute('href', dataUri);
-    link.setAttribute('download', `arbres-genealogiques-${new Date().getTime()}.json`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    this.showToast('Données exportées en JSON', 'success', '💾');
-  }
-
 
   // === MÉTHODES D'ARBRE ===
   get treeData(): any[] {
@@ -856,8 +1018,7 @@ export class AppComponent implements OnInit {
   }
 
   // Écouteur pour la touche Échap
-  @HostListener('document:keydown.escape')
-  onEscapeKey(): void {
+  onEscapeKeyOld(): void {
     if (this.showPersonModal) {
       this.closePersonModal();
     }
@@ -883,6 +1044,7 @@ export class AppComponent implements OnInit {
     collectMembers(this.selectedFamily.members);
     return allMembers;
   }
+
   onPersonFormSubmit(formData: any): void {
     console.log('Données reçues du modal:', formData);
 
@@ -924,7 +1086,7 @@ export class AppComponent implements OnInit {
     }
   }
 
-// Ajoutez une méthode pour la galerie
+  // Ajoutez une méthode pour la galerie
   openPhotoGallery(person: Person): void {
     if (!person.photo) {
       this.showToast(`${person.prenom} n'a pas de photo`, 'info', '📷');
@@ -933,12 +1095,9 @@ export class AppComponent implements OnInit {
 
     // Ouvrir un modal ou une vue agrandie de la photo
     this.showToast(`Photo de ${person.prenom} ${person.nom}`, 'info', '🖼️');
-
-    // Ici, vous pourriez implémenter un modal de photo plein écran
-    // this.openFullscreenPhoto(person.photo);
   }
 
-// Ajoutez une méthode pour télécharger la photo
+  // Ajoutez une méthode pour télécharger la photo
   downloadPersonPhoto(person: Person): void {
     if (!person.photo) {
       this.showToast('Aucune photo à télécharger', 'warning', '📷');
@@ -954,7 +1113,6 @@ export class AppComponent implements OnInit {
 
     this.showToast('Photo téléchargée', 'success', '⬇️');
   }
-
 
   onViewDetails(person: Person): void {
     this.selectedPerson = person;
@@ -986,7 +1144,7 @@ export class AppComponent implements OnInit {
     this.openPersonContextMenu(person, event);
   }
 
-// Optionnel : Menu contextuel avancé
+  // Optionnel : Menu contextuel avancé
   openPersonContextMenu(person: Person, event: MouseEvent): void {
     // Créer un menu contextuel personnalisé
     const menu = document.createElement('div');
@@ -1122,13 +1280,7 @@ export class AppComponent implements OnInit {
     this.showToast('Fiche exportée', 'success', '📄');
   }
 
-  // Méthodes pour les nouvelles fonctionnalités
-  createBackup(): void {
-    // Utilisez votre service de sauvegarde
-    this.showToast('Sauvegarde créée', 'success', '💾');
-  }
-
-// Animation pour le bouton ajouter
+  // Animation pour le bouton ajouter
   animateAddButton(): void {
     const button = document.querySelector('.btn-add-member');
     if (button) {
@@ -1139,7 +1291,7 @@ export class AppComponent implements OnInit {
     }
   }
 
-// Ouvrir avec animation
+  // Ouvrir avec animation
   openAddPersonModal(parent?: Person): void {
     this.animateAddButton();
 
@@ -1174,7 +1326,7 @@ export class AppComponent implements OnInit {
     return this.maxLevel + 1 - this.collapsedLevels.size;
   }
 
-// Écouteurs de raccourcis clavier
+  // Écouteurs de raccourcis clavier
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
     // Ctrl + E pour tout développer
@@ -1196,6 +1348,41 @@ export class AppComponent implements OnInit {
         event.preventDefault();
         this.scrollToGeneration(level);
       }
+    }
+  }
+
+
+
+// Nouveau nom (sans conflit)
+  shareFamilyViaMenu(): void {
+    if (this.selectedFamily) {
+      const shareData = {
+        title: `Arbre Généalogique - ${this.selectedFamily.name}`,
+        text: `Découvrez l'arbre généalogique de ${this.selectedFamily.name}`,
+        url: window.location.href
+      };
+
+      if (navigator.share) {
+        navigator.share(shareData)
+          .then(() => {
+            this.showToast('Partage réussi', 'success', '✅');
+            this.closeActionsMenu();
+          })
+          .catch(() => {
+            this.showToast('Partage annulé', 'info', 'ℹ️');
+          });
+      } else {
+        navigator.clipboard.writeText(window.location.href)
+          .then(() => {
+            this.showToast('Lien copié dans le presse-papier', 'success', '📋');
+            this.closeActionsMenu();
+          })
+          .catch(() => {
+            this.showToast('Impossible de copier le lien', 'error', '❌');
+          });
+      }
+    } else {
+      this.showToast('Veuillez sélectionner une famille d\'abord', 'warning', '⚠️');
     }
   }
 }

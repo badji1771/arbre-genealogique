@@ -334,77 +334,17 @@
                 </div>
               </div>
 
-              <!-- Bouton Actions amélioré -->
-              <div class="actions-container">
-                <button class="btn-actions">
+              <!-- Bouton Actions avec ouverture au clic -->
+              <div class="actions-container" [class.has-open-menu]="isActionsMenuOpen">
+                <button class="btn-actions"
+                        (click)="toggleActionsMenu($event)"
+                        [class.active]="isActionsMenuOpen">
                   <div class="btn-actions-content">
                     <span class="btn-actions-icon">⚡</span>
                     <span class="btn-actions-text">Actions</span>
                     <span class="btn-actions-arrow">▼</span>
                   </div>
                 </button>
-
-                <div class="actions-dropdown">
-                  <div class="dropdown-header">
-                    <span class="dropdown-icon">📋</span>
-                    <span class="dropdown-title">Actions rapides</span>
-                  </div>
-
-                  <div class="dropdown-section">
-                    <h6 class="section-title">Export</h6>
-                    <button (click)="exportCurrentFamily()" class="dropdown-item">
-                      <span class="item-icon">📊</span>
-                      <span class="item-text">Exporter Excel</span>
-                      <span class="item-badge">Nouveau</span>
-                    </button>
-                    <button (click)="exportToJson()" class="dropdown-item">
-                      <span class="item-icon">💾</span>
-                      <span class="item-text">Exporter JSON</span>
-                    </button>
-                    <button (click)="exportStatistics()" class="dropdown-item">
-                      <span class="item-icon">📈</span>
-                      <span class="item-text">Statistiques</span>
-                    </button>
-                  </div>
-
-                  <div class="dropdown-section">
-                    <h6 class="section-title">Gestion</h6>
-                    <button (click)="duplicateFamily()" class="dropdown-item">
-                      <span class="item-icon">⎘</span>
-                      <span class="item-text">Dupliquer famille</span>
-                    </button>
-                    <button (click)="shareFamily()" class="dropdown-item">
-                      <span class="item-icon">↗️</span>
-                      <span class="item-text">Partager</span>
-                      <span class="item-badge">Pro</span>
-                    </button>
-                    <button (click)="createBackup()" class="dropdown-item">
-                      <span class="item-icon">💾</span>
-                      <span class="item-text">Sauvegarder</span>
-                    </button>
-                  </div>
-
-                  <div class="dropdown-section">
-                    <h6 class="section-title">Avancé</h6>
-                    <button (click)="openJsonManager()" class="dropdown-item">
-                      <span class="item-icon">📁</span>
-                      <span class="item-text">Gestion JSON</span>
-                    </button>
-                    <button (click)="importFromGedcom()" class="dropdown-item">
-                      <span class="item-icon">📤</span>
-                      <span class="item-text">Importer GEDCOM</span>
-                    </button>
-                    <button (click)="clearAllData()" class="dropdown-item dropdown-danger">
-                      <span class="item-icon">🗑️</span>
-                      <span class="item-text">Tout effacer</span>
-                    </button>
-                  </div>
-
-                  <div class="dropdown-footer">
-                    <span class="footer-text">Version 2.0</span>
-                    <span class="footer-stats">{{ families.length }} familles</span>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -445,7 +385,6 @@
         </div>
 
         <!-- Vues de l'arbre -->
-        <!-- Remplacez la section view-controls dans le template HTML -->
         <div class="view-controls-container">
           <div class="view-selector-group">
             <!-- Sélecteur de vue principal -->
@@ -505,7 +444,6 @@
             </div>
 
             <!-- Contrôles d'expansion/contraction -->
-            <!-- Remplacez la section expansion-controls par ceci -->
             <div class="expansion-controls">
               <!-- Groupe compact pour les deux boutons -->
               <div class="expansion-group compact">
@@ -540,7 +478,7 @@
                 </button>
               </div>
 
-              <!-- Indicateur d'état (optionnel, peut être déplacé) -->
+              <!-- Indicateur d'état -->
               <div class="expansion-state" *ngIf="selectedFamily">
                 <div class="state-indicator">
                   <div class="state-bar">
@@ -590,7 +528,7 @@
           </div>
         </div>
 
-        <!-- Contenu de la vue arbre -->
+        <!-- Contenu de la vue -->
         <div class="view-content">
           <div *ngIf="selectedFamily.members.length === 0" class="empty-family">
             <div class="empty-illustration">
@@ -665,7 +603,6 @@
                             </div>
 
                             <!-- Carte personne -->
-
                             <app-person-card
                               [person]="node.person"
                               [isSelected]="node.isSelected"
@@ -759,7 +696,6 @@
     </section>
   </main>
 
-  <!-- Barre latérale contextuelle des détails personne -->
   <!-- Barre latérale contextuelle des détails personne -->
   <aside class="context-sidebar" [class.visible]="selectedPerson">
     <div *ngIf="selectedPerson" class="sidebar-content">
@@ -1035,6 +971,80 @@
       <button class="toast-close" (click)="dismissToast(toast)">×</button>
     </div>
   </div>
+
+  <!-- Menu Actions (placé à la racine pour le z-index) -->
+  <div class="actions-dropdown-overlay" #globalDropdown (click)="closeActionsMenu($event)"
+       [class.visible]="isActionsMenuOpen">
+    <div class="actions-dropdown-content" (click)="$event.stopPropagation()">
+      <!-- Bouton de fermeture -->
+      <button class="dropdown-close-btn" (click)="closeActionsMenu($event)" title="Fermer">
+        ✕
+      </button>
+
+      <!-- En-tête du menu -->
+      <div class="dropdown-header">
+        <span class="dropdown-icon">📋</span>
+        <span class="dropdown-title">Actions rapides</span>
+      </div>
+
+      <!-- Sections du menu -->
+      <div class="dropdown-section">
+        <h6 class="section-title">Export</h6>
+        <button (click)="exportCurrentFamily(); closeActionsMenu()" class="dropdown-item">
+          <span class="item-icon">📊</span>
+          <span class="item-text">Exporter Excel</span>
+          <span class="item-badge">Nouveau</span>
+        </button>
+        <button (click)="exportToJson(); closeActionsMenu()" class="dropdown-item">
+          <span class="item-icon">💾</span>
+          <span class="item-text">Exporter JSON</span>
+        </button>
+        <button (click)="exportStatistics(); closeActionsMenu()" class="dropdown-item">
+          <span class="item-icon">📈</span>
+          <span class="item-text">Statistiques</span>
+        </button>
+      </div>
+
+      <div class="dropdown-section">
+        <h6 class="section-title">Gestion</h6>
+        <button (click)="duplicateFamily(); closeActionsMenu()" class="dropdown-item">
+          <span class="item-icon">⎘</span>
+          <span class="item-text">Dupliquer famille</span>
+        </button>
+        <button (click)="shareFamilyViaMenu(); closeActionsMenu()" class="dropdown-item">
+          <span class="item-icon">↗️</span>
+          <span class="item-text">Partager</span>
+          <span class="item-badge">Pro</span>
+        </button>
+        <button (click)="createBackup(); closeActionsMenu()" class="dropdown-item">
+          <span class="item-icon">💾</span>
+          <span class="item-text">Sauvegarder</span>
+        </button>
+      </div>
+
+      <div class="dropdown-section">
+        <h6 class="section-title">Avancé</h6>
+        <button (click)="openJsonManager(); closeActionsMenu()" class="dropdown-item">
+          <span class="item-icon">📁</span>
+          <span class="item-text">Gestion JSON</span>
+        </button>
+        <button (click)="importFromGedcom(); closeActionsMenu()" class="dropdown-item">
+          <span class="item-icon">📤</span>
+          <span class="item-text">Importer GEDCOM</span>
+        </button>
+        <button (click)="clearAllData(); closeActionsMenu()" class="dropdown-item dropdown-danger">
+          <span class="item-icon">🗑️</span>
+          <span class="item-text">Tout effacer</span>
+        </button>
+      </div>
+
+      <div class="dropdown-footer">
+        <span class="footer-text">Version 2.0</span>
+        <span class="footer-stats">{{ families.length }} familles</span>
+      </div>
+    </div>
+  </div>
+
   <app-json-manager
     *ngIf="showJsonManager"
     (close)="closeJsonManager()"
