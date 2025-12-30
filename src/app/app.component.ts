@@ -1,14 +1,24 @@
-import { Component, OnInit, ElementRef, ViewChild, HostListener, ChangeDetectorRef, AfterViewInit } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ElementRef,
+  ViewChild,
+  HostListener,
+  ChangeDetectorRef,
+  AfterViewInit,
+  inject
+} from '@angular/core';
 import { FamilyTreeService } from './services/family-tree.service';
 import { ExcelExportService } from './services/excel-export.service';
 import { Family, Person } from './models/person.model';
 import { CommonModule, DatePipe } from "@angular/common";
 import { PersonCardComponent } from './components/person-card/person-card.component';
-import { FamilySidebarComponent } from './components/family-sidebar/family-sidebar.component';
 import { PersonModalComponent } from './components/person-modal/person-modal.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { JsonDatabaseService } from "./services/json-database.service";
 import { JsonManagerComponent } from "./components/json-manager/json-manager.component";
+import {GuideService} from "./services/GuideService";
+import {GuideComponent} from "./components/guide/guide.component";
 
 interface Toast {
   id: number;
@@ -33,11 +43,11 @@ interface QuickOption {
     CommonModule,
     DatePipe,
     PersonCardComponent,
-    FamilySidebarComponent,
     PersonModalComponent,
     FormsModule,
     ReactiveFormsModule,
-    JsonManagerComponent
+    JsonManagerComponent,
+    GuideComponent
   ],
   styleUrls: ['./app.component.css']
 })
@@ -46,6 +56,8 @@ export class AppComponent implements OnInit, AfterViewInit {
   families: Family[] = [];
   selectedFamily: Family | null = null;
   selectedPerson: Person | null = null;
+  guideService = inject(GuideService);
+
 
   showJsonManager = false;
 
@@ -75,8 +87,15 @@ export class AppComponent implements OnInit, AfterViewInit {
   // Nouvelles propriétés pour l'interface améliorée
   toasts: Toast[] = [];
   toastId = 0;
-  isLoading = false;
-  searchQuery = '';
+
+// Ajouter dans la classe
+  @ViewChild('guideComponent') guideComponent!: GuideComponent;
+
+// Mettre à jour la méthode showGuide()
+  showGuide(): void {
+    this.guideComponent.show();
+    this.showToast('Guide ouvert', 'info', '📖');
+  }
 
   // Options de démarrage rapide
   quickOptions: QuickOption[] = [
@@ -120,7 +139,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   constructor(
     private jsonDb: JsonDatabaseService,
     private excelExportService: ExcelExportService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef, guideService: GuideService
   ) {}
 
   ngOnInit(): void {
@@ -294,18 +313,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
   }
 
-  duplicateFamilyAction(): void {
-    if (this.selectedFamily) {
-      const duplicated = this.jsonDb.duplicateFamily(this.selectedFamily.id);
-      if (duplicated) {
-        this.selectFamily(duplicated);
-        this.showToast('Famille dupliquée avec succès', 'success', '⎘');
-        this.closeActionsMenu();
-      }
-    } else {
-      this.showToast('Veuillez sélectionner une famille d\'abord', 'warning', '⚠️');
-    }
-  }
+
 
   shareFamilyAction(): void {
     if (this.selectedFamily) {
@@ -411,9 +419,6 @@ export class AppComponent implements OnInit, AfterViewInit {
     input.click();
   }
 
-  showGuide(): void {
-    this.openTutorial();
-  }
 
   manageFamily(): void {
     this.showToast('Gestion de famille - Fonctionnalité à venir', 'info', '⚙️');
@@ -471,7 +476,21 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   openTutorial(): void {
-    this.showToast('Ouverture du guide', 'info', '📖');
+    // Ouvre le guide et reprend à l'étape suivante si disponible
+    try {
+      const next = this.guideService.getNextStep?.();
+      if (next && this.guideComponent) {
+        this.guideComponent.showStep(next.id);
+      } else if (this.guideComponent) {
+        this.guideComponent.show();
+      }
+      this.showToast('Ouverture du guide', 'info', '📖');
+    } catch (e) {
+      // En cas d'erreur, afficher au moins l'aperçu du guide
+      if (this.guideComponent) {
+        this.guideComponent.show();
+      }
+    }
   }
 
   // === MÉTHODES POUR LE TABLEAU DE BORD FAMILLE ===

@@ -5014,3 +5014,88 @@ body > .actions-dropdown-portal {
 .btn-actions.active .btn-actions-arrow {
   transform: rotate(180deg);
 }
+
+/* ===== Refactor: Header actions and Guide indicator (scoped to app header) ===== */
+/* This block standardizes header action area and adds missing classes used in the template
+   without touching existing rules. It is appended to safely override earlier scattered rules. */
+
+.modern-header .header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* Header actions container */
+.modern-header .header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Import button */
+.btn-import {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 14px;
+  background: var(--info);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: background .2s ease, transform .1s ease, box-shadow .2s ease;
+}
+.btn-import .btn-icon { font-size: 16px; }
+.btn-import:hover { background: var(--info-dark); box-shadow: var(--shadow); }
+.btn-import:active { transform: translateY(1px); box-shadow: var(--shadow-xs); }
+
+/* Guide indicator (progress + icon) */
+.guide-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  box-shadow: var(--shadow-xs);
+  transition: background .2s ease, border-color .2s ease, box-shadow .2s ease, transform .1s ease;
+}
+.guide-indicator:hover { background: var(--gray-50); border-color: var(--gray-300); box-shadow: var(--shadow-sm); }
+.guide-indicator:active { transform: translateY(1px); }
+
+.indicator-icon { font-size: 18px; line-height: 1; }
+
+.indicator-progress { display: inline-flex; align-items: center; gap: 8px; }
+
+/* Linear progress bar used in guide indicator */
+.progress-bar {
+  position: relative;
+  width: 90px;
+  height: 8px;
+  background: var(--gray-200);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+/* Reuse global .progress-fill animation if present; ensure base style here */
+.progress-bar .progress-fill {
+  position: absolute;
+  top: 0; left: 0; height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  border-radius: inherit;
+  transition: width .3s ease;
+}
+
+.progress-text { font-size: 12px; color: var(--gray-700); min-width: 28px; text-align: right; }
+
+/* Responsive tweaks for small screens */
+@media (max-width: 640px) {
+  .modern-header .header-top { flex-direction: column; align-items: stretch; }
+  .modern-header .header-actions { justify-content: space-between; }
+  .progress-bar { width: 72px; }
+}

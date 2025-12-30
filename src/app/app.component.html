@@ -13,15 +13,26 @@
         </div>
       </div>
 
+
       <div class="header-actions">
-        <button class="btn-import" (click)="triggerImport()">
+        <button class="btn-import" type="button" (click)="triggerImport()" aria-label="Importer des données">
           <span class="btn-icon">📤</span>
           Importer
         </button>
-        <button class="btn-guide" (click)="showGuide()">
-          <span class="btn-icon">❓</span>
-          Guide
-        </button>
+        <div class="guide-indicator" (click)="showGuide()" title="Guide" role="button" tabindex="0" (keydown.enter)="showGuide()" [attr.aria-label]="'Ouvrir le guide, progression ' + guideService.getProgressPercentage() + '%'">
+          <span class="indicator-icon">🎓</span>
+          <span class="indicator-progress">
+            <span class="progress-bar">
+              <span
+                class="progress-fill"
+                [style.width.%]="guideService.getProgressPercentage()"
+              ></span>
+            </span>
+            <span class="progress-text">
+              {{ guideService.getProgressPercentage() }}%
+            </span>
+          </span>
+        </div>
       </div>
     </div>
 
@@ -74,7 +85,7 @@
             (keyup.enter)="addNewFamily()"
           />
           <div class="card-actions">
-            <button (click)="addNewFamily()" class="btn-confirm">
+            <button type="button" (click)="addNewFamily()" class="btn-confirm" aria-label="Créer la famille">
               <span class="btn-icon">✓</span>
               Créer
             </button>
@@ -121,7 +132,7 @@
               <div class="preview-tree">
                 <div class="tree-level" *ngFor="let level of [1,2,3]"></div>
               </div>
-              <button class="btn-quick-view" (click)="quickView(family)">
+              <button class="btn-quick-view" type="button" (click)="$event.stopPropagation(); quickView(family)" aria-label="Aperçu rapide de la famille">
                 👁️
               </button>
             </div>
@@ -695,6 +706,9 @@
       </div>
     </section>
   </main>
+
+    <!-- Composant de guide (overlay modal) -->
+    <app-guide #guideComponent></app-guide>
 
   <!-- Barre latérale contextuelle des détails personne -->
   <aside class="context-sidebar" [class.visible]="selectedPerson">

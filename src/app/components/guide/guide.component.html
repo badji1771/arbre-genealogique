@@ -1,0 +1,175 @@
+<!-- guide.component.html -->
+<div
+  #guideOverlay
+  class="guide-overlay"
+  *ngIf="isVisible"
+  (click)="hide()"
+>
+  <div #guideModal class="guide-modal" (click)="$event.stopPropagation()">
+    <!-- En-tête -->
+    <div class="guide-header">
+      <h2>
+        <span class="header-icon">🎓</span>
+        Guide
+      </h2>
+      <button class="btn-close" (click)="hide()" title="Fermer">×</button>
+    </div>
+
+    <!-- Vue d'ensemble -->
+    <div class="guide-content" *ngIf="showOverview">
+      <div class="overview-content">
+        <div class="progress-section">
+          <div class="progress-circle">
+            <svg width="120" height="120">
+              <circle class="circle-bg" cx="60" cy="60" r="50"></circle>
+              <circle
+                class="circle-progress"
+                cx="60"
+                cy="60"
+                r="50"
+                [attr.stroke-dashoffset]="314 - (314 * progressPercentage / 100)"
+              ></circle>
+            </svg>
+            <div class="progress-text">{{ progressPercentage }}%</div>
+          </div>
+
+          <div class="progress-info">
+            <h3>Progression du guide</h3>
+            <p>
+              {{ completedSections }}/{{ sections.length }} sections terminées<br>
+              {{ getCompletedSteps() }}/{{ getTotalSteps() }} étapes complétées
+            </p>
+          </div>
+        </div>
+
+        <div class="sections-grid">
+          <div
+            *ngFor="let section of sections"
+            class="section-card"
+            [class.completed]="isSectionCompleted(section.id)"
+            (click)="startSection(section.id)"
+          >
+            <div class="section-header">
+              <div class="section-icon">{{ section.icon }}</div>
+              <div class="section-title">
+                <h4>{{ section.title }}</h4>
+                <p>{{ section.description }}</p>
+              </div>
+            </div>
+
+            <div class="section-progress">
+              <div
+                class="progress-fill"
+                [style.width.%]="getSectionProgress(section.id)"
+              ></div>
+            </div>
+
+            <div *ngIf="isSectionCompleted(section.id)" class="status-badge">
+              <span>✓</span>
+              <span>Terminé</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="overview-actions">
+          <button class="btn btn-primary" (click)="continueGuide()">
+            <span class="btn-icon">▶️</span>
+            Continuer le guide
+          </button>
+          <button class="btn btn-outline" (click)="showQuickStartGuide()">
+            <span class="btn-icon">⚡</span>
+            Démarrage rapide
+          </button>
+          <button class="btn btn-outline" (click)="resetGuide()">
+            <span class="btn-icon">🔄</span>
+            Recommencer
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Démarrage rapide -->
+    <div class="guide-content" *ngIf="showQuickStart">
+      <div class="quickstart-content">
+        <div class="quickstart-icon">⚡</div>
+        <h2 class="quickstart-title">Démarrage rapide</h2>
+        <p class="quickstart-description">
+          Suivez ces 4 étapes pour démarrer rapidement avec votre arbre généalogique
+        </p>
+
+        <div class="quickstart-steps">
+          <div class="quickstep" (click)="showStep('create-first-family')">
+            <div class="step-number">1</div>
+            <div class="step-content-text">
+              <h4>Créer une famille</h4>
+              <p>Créez votre première famille pour organiser votre arbre</p>
+            </div>
+          </div>
+
+          <div class="quickstep" (click)="showStep('add-first-person')">
+            <div class="step-number">2</div>
+            <div class="step-content-text">
+              <h4>Ajouter le fondateur</h4>
+              <p>Ajoutez la première personne de votre arbre généalogique</p>
+            </div>
+          </div>
+
+          <div class="quickstep" (click)="showStep('add-children')">
+            <div class="step-number">3</div>
+            <div class="step-content-text">
+              <h4>Ajouter des enfants</h4>
+              <p>Étendez votre arbre en ajoutant des descendants</p>
+            </div>
+          </div>
+
+          <div class="quickstep" (click)="showStep('switch-views')">
+            <div class="step-number">4</div>
+            <div class="step-content-text">
+              <h4>Explorer les vues</h4>
+              <p>Découvrez différentes manières de visualiser votre arbre</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-actions">
+          <button class="btn btn-outline" (click)="showOverview = true">
+            <span class="btn-icon">←</span>
+            Retour
+          </button>
+          <button class="btn btn-primary" (click)="startFromBeginning()">
+            <span class="btn-icon">🚀</span>
+            Commencer maintenant
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Étape individuelle -->
+    <div class="guide-content" *ngIf="currentStep">
+      <div #stepContent class="step-content">
+        <div class="step-icon">{{ currentStep.icon }}</div>
+        <h2 class="step-title">{{ currentStep.title }}</h2>
+        <p class="step-description">{{ currentStep.description }}</p>
+
+        <div *ngIf="currentSection" class="step-section">
+          <div class="section-badge">
+            <span class="section-badge-icon">{{ currentSection.icon }}</span>
+            <span>{{ currentSection.title }}</span>
+          </div>
+          <p>Section : {{ currentSection.description }}</p>
+        </div>
+
+        <div class="step-actions">
+          <button class="btn btn-outline" (click)="skipCurrentStep()">
+            <span class="btn-icon">⏭️</span>
+            Passer cette étape
+          </button>
+          <button class="btn btn-primary" (click)="completeCurrentStep()">
+            <span class="btn-icon">✓</span>
+            J'ai compris
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
