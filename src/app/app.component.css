@@ -5099,3 +5099,327 @@ body > .actions-dropdown-portal {
   .modern-header .header-actions { justify-content: space-between; }
   .progress-bar { width: 72px; }
 }
+
+/* ===== Global UI refresh: unified button system and soft-rounded shapes ===== */
+/* This layer is appended to avoid breaking existing rules while improving visuals. */
+
+/********************
+  Base button system
+*********************/
+.btn,
+.secondary-btn,
+.btn-action-primary,
+.btn-confirm,
+.btn-cancel,
+.btn-start,
+.btn-start-tree,
+.btn-quick-view,
+.btn-add-circle,
+.btn-toggle,
+.nav-btn,
+.dropdown-item {
+  --btn-bg: var(--gray-100);
+  --btn-fg: var(--gray-800);
+  --btn-border: var(--gray-200);
+  --btn-bg-hover: var(--gray-50);
+  --btn-fg-hover: var(--gray-900);
+  --btn-border-hover: var(--gray-300);
+  --btn-shadow: var(--shadow-xs);
+  --btn-shadow-hover: var(--shadow-sm);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 14px;
+  font-weight: 600;
+  letter-spacing: .2px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--btn-border);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  box-shadow: var(--btn-shadow);
+  cursor: pointer;
+  user-select: none;
+  transition: background .2s ease, color .2s ease, border-color .2s ease, box-shadow .2s ease, transform .06s ease;
+}
+
+.btn .btn-icon,
+.secondary-btn .btn-icon,
+.dropdown-item .item-icon,
+.btn-start .btn-icon,
+.btn-start-tree .btn-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.btn:hover,
+.secondary-btn:hover,
+.btn-action-primary:hover,
+.btn-confirm:hover,
+.btn-cancel:hover,
+.btn-start:hover,
+.btn-start-tree:hover,
+.btn-quick-view:hover,
+.btn-add-circle:hover,
+.btn-toggle:hover,
+.nav-btn:hover,
+.dropdown-item:hover {
+  background: var(--btn-bg-hover);
+  color: var(--btn-fg-hover);
+  border-color: var(--btn-border-hover);
+  box-shadow: var(--btn-shadow-hover);
+}
+
+.btn:active,
+.secondary-btn:active,
+.btn-action-primary:active,
+.btn-confirm:active,
+.btn-cancel:active,
+.btn-start:active,
+.btn-start-tree:active,
+.btn-quick-view:active,
+.btn-add-circle:active,
+.btn-toggle:active,
+.nav-btn:active,
+.dropdown-item:active {
+  transform: translateY(1px);
+}
+
+/* Focus ring for accessibility */
+.btn:focus-visible,
+.secondary-btn:focus-visible,
+.btn-action-primary:focus-visible,
+.btn-confirm:focus-visible,
+.btn-cancel:focus-visible,
+.btn-start:focus-visible,
+.btn-start-tree:focus-visible,
+.btn-quick-view:focus-visible,
+.btn-add-circle:focus-visible,
+.btn-toggle:focus-visible,
+.nav-btn:focus-visible,
+.dropdown-item:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--primary-ultralight), 0 1px 2px rgba(0,0,0,.06);
+  border-color: var(--primary);
+}
+
+/********************
+  Color variants
+*********************/
+/* Primary look (soft rounded) */
+.btn-primary,
+.btn-action-primary,
+.btn-confirm,
+.btn-start,
+.btn-start-tree {
+  --btn-bg: var(--primary);
+  --btn-fg: var(--white);
+  --btn-border: transparent;
+  --btn-bg-hover: var(--primary-dark);
+  --btn-fg-hover: var(--white);
+  --btn-border-hover: transparent;
+}
+
+/* Secondary (green) for positive context */
+.btn-secondary,
+.secondary-btn:not(.btn-warning):not(.btn-danger):not(.btn-info) {
+  --btn-bg: var(--secondary);
+  --btn-fg: var(--white);
+  --btn-border: transparent;
+  --btn-bg-hover: var(--secondary-dark);
+  --btn-fg-hover: var(--white);
+  --btn-border-hover: transparent;
+}
+
+/* Info, Warning, Danger for secondary action buttons */
+.secondary-btn.btn-info,
+.btn-info {
+  --btn-bg: var(--info);
+  --btn-fg: var(--white);
+  --btn-bg-hover: var(--info-dark);
+  --btn-border: transparent;
+  --btn-border-hover: transparent;
+}
+.secondary-btn.btn-warning,
+.btn-warning {
+  --btn-bg: var(--warning);
+  --btn-fg: var(--white);
+  --btn-bg-hover: var(--warning-dark);
+  --btn-border: transparent;
+  --btn-border-hover: transparent;
+}
+.secondary-btn.btn-danger,
+.btn-danger {
+  --btn-bg: var(--danger);
+  --btn-fg: var(--white);
+  --btn-bg-hover: var(--danger-dark);
+  --btn-border: transparent;
+  --btn-border-hover: transparent;
+}
+
+/* Neutral/outline styles */
+.btn-outline,
+.btn-cancel,
+.dropdown-item {
+  --btn-bg: var(--white);
+  --btn-fg: var(--gray-800);
+  --btn-border: var(--gray-300);
+  --btn-bg-hover: var(--gray-50);
+  --btn-fg-hover: var(--gray-900);
+  --btn-border-hover: var(--gray-400);
+}
+
+/* Ghost (for text-ish buttons) */
+.btn-ghost {
+  --btn-bg: transparent;
+  --btn-fg: var(--gray-700);
+  --btn-border: transparent;
+  --btn-bg-hover: var(--gray-100);
+  --btn-fg-hover: var(--gray-900);
+  --btn-border-hover: var(--gray-200);
+}
+
+/********************
+  Size and shape
+*********************/
+.btn-sm { height: 32px; padding: 0 10px; border-radius: var(--radius); font-weight: 600; }
+.btn-lg { height: 48px; padding: 0 18px; border-radius: var(--radius-xl); font-weight: 700; }
+.btn-pill { border-radius: var(--radius-full); }
+.btn-circle,
+.btn-add-circle,
+.btn-quick-view,
+.nav-btn {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: var(--radius-full);
+}
+
+/* Specific circular buttons visual polish */
+.btn-add-circle {
+  --btn-bg: var(--primary);
+  --btn-fg: var(--white);
+  --btn-border: transparent;
+  --btn-bg-hover: var(--primary-dark);
+  --btn-fg-hover: var(--white);
+}
+.btn-quick-view {
+  --btn-bg: var(--gray-100);
+  --btn-fg: var(--gray-800);
+  --btn-border: var(--gray-200);
+  --btn-bg-hover: var(--gray-50);
+  --btn-fg-hover: var(--gray-900);
+}
+.nav-btn {
+  --btn-bg: var(--gray-900);
+  --btn-fg: var(--white);
+  --btn-border: transparent;
+  --btn-bg-hover: #0b1220; /* slightly darker */
+  --btn-fg-hover: var(--white);
+}
+
+/********************
+  Dropdown items
+*********************/
+.dropdown-item {
+  justify-content: flex-start;
+  width: 100%;
+  height: 44px;
+  border-radius: var(--radius);
+}
+.dropdown-item .item-text { flex: 1; text-align: left; }
+.dropdown-item.dropdown-danger { --btn-bg: var(--danger-light); --btn-fg: var(--danger-dark); --btn-border: var(--danger); }
+
+/********************
+  Toggles and minor buttons
+*********************/
+.btn-toggle {
+  --btn-bg: var(--gray-100);
+  --btn-fg: var(--gray-800);
+  --btn-border: var(--gray-300);
+  --btn-bg-hover: var(--gray-50);
+}
+
+/* Ensure buttons inside cards don’t stretch unexpectedly */
+.card-actions .btn,
+.card-actions .btn-confirm,
+.card-actions .btn-cancel { min-width: 110px; }
+
+/* Improve disabled state if used */
+.btn[disabled],
+.secondary-btn[disabled],
+.btn-action-primary[disabled],
+.btn-confirm[disabled],
+.btn-cancel[disabled],
+.btn-start[disabled],
+.btn-start-tree[disabled] {
+  opacity: .6;
+  cursor: not-allowed;
+  filter: grayscale(.1);
+}
+
+
+/* ===== Enhancements: Generation bands positioning and content =====
+   Scope: tree view bands (generation sidebar, markers, and level blocks)
+   Goal: better alignment, readable zebra bands, smoother navigation without affecting existing layout. */
+
+/* Keep the generation sidebar actually sticky within viewport */
+.generation-sidebar {
+  position: sticky;
+  top: 12px; /* prevents overlap with header and keeps markers visible */
+}
+
+/* Smoother in-page navigation to generations and account for header offset */
+.generations-content {
+  scroll-behavior: smooth;
+}
+
+.generation-level {
+  scroll-margin-top: 96px; /* avoid being hidden under the page header on scrollTo */
+}
+
+/* Visual bands (zebra) to improve separation of generations without heavy borders */
+.generations-content .generation-level {
+  background: transparent;
+  border-radius: var(--radius-lg);
+}
+
+.generations-content .generation-level:nth-child(odd) {
+  background: linear-gradient(0deg, rgba(249,250,251,0.8), rgba(255,255,255,0.8)); /* gray-50 -> white */
+}
+
+/* Elevate the header of each band and keep it pinned inside the section for better context */
+.level-header {
+  position: sticky;
+  top: 0; /* sticks inside the scrollable generations-content container */
+  z-index: 2;
+  background: inherit; /* match band background */
+  backdrop-filter: saturate(1.1);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius) ;
+}
+
+/* Improve the spacing and readability inside each band */
+.level-content {
+  padding: 0.5rem 0.75rem 1.25rem 0.75rem;
+}
+
+/* Make generation markers easier to target and align visually with bands */
+.generation-marker {
+  padding: 6px 0; /* expands hit area for click */
+}
+
+/* Ensure the vertical line aligns with band starts and ends more cleanly */
+.generation-marker .marker-line {
+  width: 3px;
+  border-radius: 2px;
+}
+
+/* On very small screens, reduce band padding to keep content dense */
+@media (max-width: 640px) {
+  .generation-sidebar { top: 8px; }
+  .level-header { padding: 0.5rem; }
+  .level-content { padding: 0.5rem 0.5rem 1rem; }
+}
