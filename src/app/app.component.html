@@ -109,7 +109,7 @@
                 <div class="avatar-progress">
                   <div
                     class="progress-fill"
-                    [style.width.%]="(family.members.length / 50) * 100"
+                    [style.width.%]="(getFamilyMemberCount(family) / 50) * 100"
                   ></div>
                 </div>
               </div>
@@ -118,7 +118,7 @@
                 <div class="meta-info">
                   <span class="info-item">
                     <span class="info-icon">👤</span>
-                    {{ family.members.length }}
+                    {{ getFamilyMemberCount(family) }}
                   </span>
                   <span class="info-item">
                     <span class="info-icon">📅</span>
@@ -565,7 +565,7 @@
           </div>
 
           <!-- Vue arbre généalogique -->
-          <ng-container *ngIf="selectedFamily.members.length > 0 && currentView === 'tree'">
+          <ng-container *ngIf="getFamilyMemberCount(selectedFamily!) > 0 && currentView === 'tree'">
             <div class="tree-view modern-tree" #treeContainer>
               <div class="tree-wrapper">
                 <!-- Barre latérale des générations -->
@@ -651,7 +651,7 @@
           </ng-container>
 
           <!-- Vue liste -->
-          <ng-container *ngIf="selectedFamily.members.length > 0 && currentView === 'list'">
+          <ng-container *ngIf="getFamilyMemberCount(selectedFamily!) > 0 && currentView === 'list'">
             <div class="list-view">
               <div class="list-header">
                 <h3>Liste des membres</h3>

@@ -1,7 +1,8 @@
 // services/json-database.service.ts
 import { Injectable } from '@angular/core';
 import { Family, Person } from '../models/person.model';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { ApiService, FamilyDto, PersonDto } from './api.service';
 
 @Injectable({
   providedIn: 'root'
@@ -18,16 +19,148 @@ export class JsonDatabaseService {
   selectedFamily$ = this.selectedFamilySubject.asObservable();
 
   private families: Family[] = [];
+  private memberCounts = new Map<number, number>(); // cache des nombres de membres par famille
 
-  constructor() {
-    this.loadFromLocalStorage();
-    this.setupAutoSave();
+  constructor(private api: ApiService) {
+    if (this.isBackendMode()) {
+      this.loadFromBackend();
+    } else {
+      this.loadFromLocalStorage();
+      this.setupAutoSave();
+    }
+  }
+
+  // === Backend toggle and loaders ===
+  private isBackendMode(): boolean {
+    // Backend enabled by default. Set localStorage 'useBackend' to 'false' to force local mode.
+    const flag = localStorage.getItem('useBackend');
+    return flag !== 'false';
+  }
+
+  private loadFromBackend(): void {
+    this.api.getFamilies().subscribe({
+      next: (dtos: FamilyDto[]) => {
+        this.families = (dtos || []).map(d => ({
+          id: d.id!,
+          name: d.name,
+          members: [],
+          createdAt: d.createdAt ? new Date(d.createdAt) : new Date(),
+          updatedAt: d.createdAt ? new Date(d.createdAt) : new Date(),
+          memberCount: this.memberCounts.get(d.id!) || 0
+        }));
+        this.familiesSubject.next([...this.families]);
+        // Auto-sélectionner la première famille pour déclencher le chargement des membres
+        if (!this.selectedFamilySubject.value && this.families.length > 0) {
+          this.selectFamily(this.families[0]);
+        }
+      },
+      error: (e) => {
+        console.error('Backend non disponible, retour au mode local', e);
+        // fallback: charger le local
+        this.loadFromLocalStorage();
+        this.setupAutoSave();
+      }
+    });
+  }
+
+  private dtoToPerson(dto: PersonDto): Person {
+    const p: Person = {
+      id: dto.id!,
+      nom: dto.lastName || '',
+      prenom: dto.firstName || '',
+      genre: (dto.gender === 'HOMME' ? 'homme' : dto.gender === 'FEMME' ? 'femme' : 'homme'),
+      parentId: dto.fatherId || dto.motherId || null,
+      email: dto.email || undefined,
+      telephone: dto.phone || undefined,
+      adresse: dto.address || undefined,
+      profession: dto.job || undefined,
+      notes: dto.notes || undefined,
+      photo: dto.photoUrl || undefined,
+      dateNaissance: dto.birthDate ? new Date(dto.birthDate) : undefined,
+      children: []
+    } as Person;
+    return p;
+  }
+
+  private personToDto(p: Person, familyId: number): PersonDto {
+    const dto: PersonDto = {
+      id: p.id,
+      firstName: p.prenom,
+      lastName: p.nom,
+      gender: p.genre === 'homme' ? 'HOMME' : 'FEMME',
+      birthDate: p.dateNaissance ? new Date(p.dateNaissance).toISOString().substring(0,10) : null,
+      email: p.email || null,
+      phone: p.telephone || null,
+      address: p.adresse || null,
+      job: p.profession || null,
+      notes: p.notes || null,
+      photoUrl: p.photo || null,
+      familyId: familyId,
+      fatherId: null,
+      motherId: null,
+      spouseIds: null
+    };
+    // Utilise parentId comme père par défaut si genre 'homme', sinon mère (simplification)
+    if (p.parentId) {
+      if (p.genre === 'homme') dto.fatherId = p.parentId; else dto.motherId = p.parentId;
+    }
+    return dto;
+  }
+
+  private buildTreeFromFlat(list: Person[]): Person[] {
+    const map = new Map<number, Person>();
+    list.forEach(p => { p.children = []; map.set(p.id, p); });
+    const roots: Person[] = [];
+    list.forEach(p => {
+      if (p.parentId && map.has(p.parentId)) {
+        map.get(p.parentId)!.children!.push(p);
+      } else {
+        roots.push(p);
+      }
+    });
+    return roots;
   }
 
   // === CRUD Operations ===
 
   // Create
   addFamily(name: string): Family {
+    // Backend mode: create remotely and sync, optimistic return
+    if (this.isBackendMode()) {
+      const tempFamily: Family = {
+        id: this.generateId(),
+        name,
+        members: [],
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      this.families.push(tempFamily);
+      this.familiesSubject.next([...this.families]);
+      this.api.createFamily(name).subscribe({
+        next: (dto: FamilyDto) => {
+          // Replace temp with real
+          const idx = this.families.findIndex(f => f.id === tempFamily.id);
+          if (idx !== -1) {
+            const real: Family = {
+              id: dto.id!,
+              name: dto.name,
+              members: [],
+              createdAt: dto.createdAt ? new Date(dto.createdAt) : new Date(),
+              updatedAt: dto.createdAt ? new Date(dto.createdAt) : new Date()
+            };
+            this.families[idx] = real;
+            this.familiesSubject.next([...this.families]);
+          }
+        },
+        error: () => {
+          // rollback
+          this.families = this.families.filter(f => f.id !== tempFamily.id);
+          this.familiesSubject.next([...this.families]);
+        }
+      });
+      return tempFamily;
+    }
+
     const newFamily: Family = {
       id: this.generateId(),
       name,
@@ -42,6 +175,43 @@ export class JsonDatabaseService {
   }
 
   addPerson(personData: Omit<Person, 'id' | 'children'>, familyId: number): Person {
+    if (this.isBackendMode()) {
+      const temp: Person = { id: this.generateId(), ...personData, children: [] } as Person;
+      // optimistic local update on selected family only
+      const fam = this.families.find(f => f.id === familyId);
+      if (fam) {
+        if (temp.parentId) {
+          this.addPersonToParent(temp, temp.parentId, fam.members);
+        } else {
+          fam.members.push(temp);
+        }
+        this.familiesSubject.next([...this.families]);
+        const current = this.selectedFamilySubject.value;
+        if (current && current.id === fam.id) this.selectedFamilySubject.next({ ...fam });
+      }
+      // send to backend
+      let dto = this.personToDto(temp, familyId);
+      // Corriger l'assignation du parent du côté backend: utiliser le genre du parent, pas celui de l'enfant
+      if (temp.parentId) {
+        const parent = this.getPersonById(temp.parentId, familyId);
+        if (parent) {
+          // Réinitialiser toute valeur précédente et définir correctement selon le parent
+          dto.fatherId = null;
+          dto.motherId = null;
+          if (parent.genre === 'homme') {
+            dto.fatherId = parent.id;
+          } else if (parent.genre === 'femme') {
+            dto.motherId = parent.id;
+          }
+        }
+      }
+      this.api.createPerson(dto).subscribe({
+        next: () => this.refreshFamilyMembersFromBackend(familyId),
+        error: () => this.refreshFamilyMembersFromBackend(familyId)
+      });
+      return temp;
+    }
+
     const family = this.families.find(f => f.id === familyId);
     if (!family) throw new Error('Famille non trouvée');
 
@@ -96,6 +266,35 @@ export class JsonDatabaseService {
     const familyIndex = this.families.findIndex(f => f.id === familyId);
     if (familyIndex === -1) return false;
 
+    if (this.isBackendMode()) {
+      const previous = { ...this.families[familyIndex] } as Family;
+      // Optimistic local update
+      this.families[familyIndex] = {
+        ...this.families[familyIndex],
+        ...updates,
+        updatedAt: new Date(),
+        id: familyId
+      };
+      this.familiesSubject.next([...this.families]);
+      const current = this.selectedFamilySubject.value;
+      if (current && current.id === familyId) this.selectedFamilySubject.next({ ...this.families[familyIndex] });
+
+      // Send patch to backend (only supported fields)
+      const patch: Partial<FamilyDto> = {};
+      if (typeof updates.name === 'string') patch.name = updates.name;
+      this.api.updateFamily(familyId, patch).subscribe({
+        next: () => {},
+        error: () => {
+          // rollback on error
+          this.families[familyIndex] = previous;
+          this.familiesSubject.next([...this.families]);
+          const curr = this.selectedFamilySubject.value;
+          if (curr && curr.id === familyId) this.selectedFamilySubject.next({ ...this.families[familyIndex] });
+        }
+      });
+      return true;
+    }
+
     this.families[familyIndex] = {
       ...this.families[familyIndex],
       ...updates,
@@ -108,6 +307,38 @@ export class JsonDatabaseService {
   }
 
   updatePerson(personId: number, updates: Partial<Person>, familyId: number): boolean {
+    if (this.isBackendMode()) {
+      const fam = this.families.find(f => f.id === familyId);
+      if (!fam) return false;
+      // optimistic local change
+      const changed = this.applyUpdateInTree(fam.members, personId, updates);
+      if (changed) {
+        this.familiesSubject.next([...this.families]);
+        const current = this.selectedFamilySubject.value;
+        if (current && current.id === fam.id) this.selectedFamilySubject.next({ ...fam });
+      }
+      // send to backend
+      const existing = this.getPersonById(personId, familyId);
+      if (existing) {
+        let dto = this.personToDto({ ...existing, ...updates } as Person, familyId);
+        // Corriger également lors des mises à jour: définir le lien parent selon le genre du parent
+        const parentId = (updates.parentId !== undefined ? updates.parentId : (existing.parentId ?? null));
+        if (parentId) {
+          const parent = this.getPersonById(parentId, familyId);
+          if (parent) {
+            dto.fatherId = null;
+            dto.motherId = null;
+            if (parent.genre === 'homme') dto.fatherId = parent.id; else if (parent.genre === 'femme') dto.motherId = parent.id;
+          }
+        }
+        this.api.updatePerson(personId, dto).subscribe({
+          next: () => this.refreshFamilyMembersFromBackend(familyId),
+          error: () => this.refreshFamilyMembersFromBackend(familyId)
+        });
+      }
+      return changed;
+    }
+
     const family = this.families.find(f => f.id === familyId);
     if (!family) return false;
 
@@ -142,6 +373,24 @@ export class JsonDatabaseService {
 
   // Delete
   deleteFamily(familyId: number): boolean {
+    if (this.isBackendMode()) {
+      const previous = [...this.families];
+      this.families = this.families.filter(f => f.id !== familyId);
+      if (this.selectedFamilySubject.value?.id === familyId) {
+        this.selectedFamilySubject.next(null);
+      }
+      this.familiesSubject.next([...this.families]);
+      this.api.deleteFamily(familyId).subscribe({
+        next: () => {},
+        error: () => {
+          // rollback
+          this.families = previous;
+          this.familiesSubject.next([...this.families]);
+        }
+      });
+      return true;
+    }
+
     const initialLength = this.families.length;
     this.families = this.families.filter(f => f.id !== familyId);
 
@@ -157,6 +406,37 @@ export class JsonDatabaseService {
   }
 
   deletePerson(personId: number, familyId: number): boolean {
+    if (this.isBackendMode()) {
+      const fam = this.families.find(f => f.id === familyId);
+      if (!fam) return false;
+      // optimistic remove
+      const previousMembers = JSON.parse(JSON.stringify(fam.members)) as Person[];
+      const deleteFromTree = (persons: Person[]): Person[] => {
+        return persons.filter(person => {
+          if (person.id === personId) return false;
+          if (person.children && person.children.length > 0) {
+            person.children = deleteFromTree(person.children);
+          }
+          return true;
+        });
+      };
+      fam.members = deleteFromTree(fam.members);
+      this.familiesSubject.next([...this.families]);
+      const current = this.selectedFamilySubject.value;
+      if (current && current.id === fam.id) this.selectedFamilySubject.next({ ...fam });
+
+      this.api.deletePerson(personId).subscribe({
+        next: () => this.refreshFamilyMembersFromBackend(familyId),
+        error: () => {
+          // rollback
+          fam.members = previousMembers;
+          this.familiesSubject.next([...this.families]);
+          if (current && current.id === fam.id) this.selectedFamilySubject.next({ ...fam });
+        }
+      });
+      return true;
+    }
+
     const family = this.families.find(f => f.id === familyId);
     if (!family) return false;
 
@@ -253,6 +533,48 @@ export class JsonDatabaseService {
 
   private generateId(): number {
     return Date.now() + Math.floor(Math.random() * 1000);
+  }
+
+  private refreshFamilyMembersFromBackend(familyId: number): void {
+    this.api.getPersonsByFamily(familyId).subscribe({
+      next: (list: PersonDto[]) => {
+        const flat = (list || []).map(dto => this.dtoToPerson(dto));
+        const tree = this.buildTreeFromFlat(flat);
+        // cache count
+        this.memberCounts.set(familyId, flat.length);
+        // update family in cache
+        const idx = this.families.findIndex(f => f.id === familyId);
+        if (idx !== -1) {
+          const updated = { ...this.families[idx], members: tree, updatedAt: new Date(), memberCount: flat.length } as Family;
+          this.families[idx] = updated;
+          this.familiesSubject.next([...this.families]);
+          const current = this.selectedFamilySubject.value;
+          if (current && current.id === familyId) {
+            this.selectedFamilySubject.next({ ...updated });
+          }
+        }
+      },
+      error: (e) => console.error('Erreur chargement personnes backend', e)
+    });
+  }
+
+  private applyUpdateInTree(persons: Person[], personId: number, updates: Partial<Person>): boolean {
+    for (let i = 0; i < persons.length; i++) {
+      if (persons[i].id === personId) {
+        persons[i] = {
+          ...persons[i],
+          ...updates,
+          id: personId,
+          children: persons[i].children || []
+        };
+        return true;
+      }
+      const children = persons[i].children;
+      if (children && Array.isArray(children) && children.length > 0) {
+        if (this.applyUpdateInTree(children, personId, updates)) return true;
+      }
+    }
+    return false;
   }
 
   private addPersonToParent(newPerson: Person, parentId: number, members: Person[]): boolean {
@@ -414,6 +736,16 @@ export class JsonDatabaseService {
   // === Sélection ===
 
   selectFamily(family: Family): void {
+    if (this.isBackendMode()) {
+      // Ensure the family exists in local cache
+      const idx = this.families.findIndex(f => f.id === family.id);
+      if (idx === -1) {
+        this.families.push({ ...family, members: [] });
+      }
+      this.selectedFamilySubject.next({ ...family, members: [] });
+      this.refreshFamilyMembersFromBackend(family.id);
+      return;
+    }
     this.selectedFamilySubject.next(family);
   }
 

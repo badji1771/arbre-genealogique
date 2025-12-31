@@ -12,6 +12,7 @@ import { FamilyTreeService } from './services/family-tree.service';
 import { ExcelExportService } from './services/excel-export.service';
 import { Family, Person } from './models/person.model';
 import { CommonModule, DatePipe } from "@angular/common";
+import { HttpClientModule } from '@angular/common/http';
 import { PersonCardComponent } from './components/person-card/person-card.component';
 import { PersonModalComponent } from './components/person-modal/person-modal.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -42,6 +43,7 @@ interface QuickOption {
   imports: [
     CommonModule,
     DatePipe,
+    HttpClientModule,
     PersonCardComponent,
     PersonModalComponent,
     FormsModule,
@@ -884,6 +886,16 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   // === MÉTHODES DE STATISTIQUES ===
+  getFamilyMemberCount(family: Family): number {
+    // Si des membres sont déjà chargés en mémoire, compter récursivement
+    if (family?.members && family.members.length > 0) {
+      return this.getTotalMembers(family);
+    }
+    // Sinon, utiliser le cache (memberCount) si présent
+    if (typeof family.memberCount === 'number') return family.memberCount;
+    return 0;
+  }
+
   getTotalMembers(family: Family): number {
     let count = 0;
     const countPersons = (persons: Person[]) => {

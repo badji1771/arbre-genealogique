@@ -24,6 +24,7 @@ export interface Family {
   createdAt: Date;
   updatedAt: Date;
   coverPhoto?: string; // Optionnel : photo de couverture de la famille
+  memberCount?: number; // Nombre total de personnes (cache côté backend)
 }
 
 
