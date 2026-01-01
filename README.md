@@ -1,78 +1,93 @@
-# ArbreGenealogique
+# 🌳 Arbre Généalogique Moderne
 
-Application Angular pour créer et explorer un arbre généalogique moderne.
+Une application Angular interactive et intuitive pour créer, visualiser et explorer votre histoire familiale.
 
-## Démarrage rapide
+![Angular](https://img.shields.io/badge/Angular-17.1-DD0031?style=for-the-badge&logo=angular)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.2-6DB33F?style=for-the-badge&logo=spring-boot)
 
-- Installer les dépendances: `npm install`
-- Lancer le serveur de dev: `npm start` puis ouvrir http://localhost:4200
+## ✨ Fonctionnalités Clés
 
-## Guide d'utilisation
+### 🗂️ Gestion Complète
+- **Familles & Personnes** : Créez plusieurs arbres indépendants. Ajoutez des membres avec des détails riches (dates, notes, photos, coordonnées).
+- **Relations Complexes** : Support des liens parents-enfants et des conjoints.
 
-Un guide pas à pas est intégré à l'application:
-- Cliquez sur le bouton « Guide » (icône ❓) dans l'en‑tête pour l'ouvrir.
-- Naviguez avec « Suivant » et « Précédent ».
-- Cliquez en dehors de la fenêtre ou appuyez sur Échap pour fermer.
+### 📊 Visualisations Multiples
+- **Vue Arbre** : Visualisation hiérarchique classique et dynamique.
+- **Vue Liste** : Recherche et filtrage rapide de tous les membres.
+- **Vue Chronologique** : Frise historique des événements familiaux.
+- **Vue Carte** : Localisation géographique des membres (basée sur les adresses).
 
-Le guide vous accompagne pour:
-- Créer votre première famille
-- Ajouter vos premières personnes
-- Parcourir les différentes vues (Arbre, Liste, Chronologie, Carte)
-- Importer/Exporter vos données
+### 📤 Échanges & Sauvegarde
+- **Import/Export JSON** : Sauvegardez l'intégralité de vos données dans un fichier simple.
+- **Support GEDCOM** : Importez vos données depuis d'autres logiciels de généalogie.
+- **Export Excel** : Générez des tableaux récapitulatifs de vos membres.
 
-## Scripts utiles
+### 🛠️ Flexibilité Technique
+- **Mode Hybride** : Fonctionne en local (localStorage) ou connecté à un serveur **Spring Boot**.
+- **Interface Responsive** : Optimisé pour ordinateur et tablettes.
 
-- `npm start`: démarre l'app en mode développement (rechargement à chaud)
-- `npm run build`: construit l'app pour la prod dans `dist/`
-- `npm test`: lance les tests unitaires
+---
 
-## Outils
+## 🚀 Démarrage Rapide
 
-Projet généré avec [Angular CLI](https://github.com/angular/angular-cli) 17.1.
+### Prérequis
+- Node.js (v18+)
+- npm
 
-# Arbre Généalogique — Connexion au backend Spring Boot
+### Installation
+1. Clonez le dépôt.
+2. Installez les dépendances :
+   ```bash
+   npm install
+   ```
+3. Lancez le serveur de développement :
+   ```bash
+   npm start
+   ```
+4. Ouvrez [http://localhost:4200](http://localhost:4200) dans votre navigateur.
 
-Cette application Angular peut fonctionner en mode local (stockage JSON/localStorage) ou se connecter à un backend Spring Boot via HTTP.
+---
 
-## Connexion backend (désormais activée par défaut)
+## 🔌 Connexion au Backend (Spring Boot)
 
-1. Démarrez votre backend Spring Boot (par défaut sur http://localhost:8080) avec les endpoints:
-   - GET /api/families
-   - POST /api/families
-   - PATCH /api/families/{id}
-   - DELETE /api/families/{id}
-   - GET /api/persons/by-family/{familyId}
-   - POST /api/persons
-   - PATCH /api/persons/{id}
-   - DELETE /api/persons/{id}
-   Assurez le CORS pour http://localhost:4200 (dev Angular).
+L'application est configurée pour communiquer avec une API REST. Par défaut, elle cherche à joindre `http://localhost:8080/api`.
 
-2. L’application enregistre désormais par défaut via l’API Spring Boot. Si votre API n’est pas sur localhost:8080, configurez l’URL:
-```js
+### Configuration de l'API
+Vous pouvez changer l'URL de l'API directement depuis la console de votre navigateur :
+```javascript
 localStorage.setItem('apiBaseUrl', 'http://localhost:8080/api');
 ```
 
-3. Pour FORCER le mode local (sans backend), utilisez:
-```js
+### Basculer en mode local uniquement
+Pour ignorer le backend et utiliser uniquement le stockage du navigateur :
+```javascript
 localStorage.setItem('useBackend', 'false');
 ```
-Puis rechargez l’application. Remettez le backend en retirant ce drapeau:
-```js
-localStorage.removeItem('useBackend');
-```
 
-4. Rechargez l'application Angular. Les familles et personnes seront chargées/sauvegardées via l’API quand disponible.
+---
 
-## Notes techniques
+## 📖 Guide d'Utilisation
 
-- Un service ApiService encapsule les appels HTTP.
-- JsonDatabaseService conserve l'API utilisée par le composant mais délègue au backend si `useBackend==='true'`.
-- AppComponent importe HttpClientModule pour permettre les requêtes.
-- Mappage simple des personnes: `prenom/nom/genre` (front) <-> `firstName/lastName/gender` (backend). Le champ `parentId` côté front est converti en `fatherId` ou `motherId` côté backend suivant le genre (simplification initiale).
-- En backend, prévoyez la configuration CORS (ex.: `@CrossOrigin(origins = "http://localhost:4200")` sur les contrôleurs, ou config globale).
-- Sécurité anti-boucles: un intercepteur HTTP côté Angular nettoie les réponses de l'API pour éviter les objets récursifs (ex: Family.members -> Person.family -> ...). Il ne conserve que les champs utiles pour `/api/families` et `/api/persons/by-family/{id}`.
+Un **Guide Interactif** est intégré ! Cliquez sur l'icône ❓ dans l'en-tête de l'application pour lancer une visite guidée des fonctionnalités.
 
-## Limitations actuelles
-- La reconstruction de l'arbre à partir des personnes du backend se base sur `parentId` (dérivé de `fatherId` ou `motherId`). Adaptez selon votre modèle exact si nécessaire.
-- Les opérations sont optimistes côté UI et un rafraîchissement depuis le backend est effectué après création/mise à jour/suppression.
+---
+
+## 🛠️ Scripts Utiles
+
+| Commande | Description |
+| :--- | :--- |
+| `npm start` | Démarre l'application en mode dev |
+| `npm run build` | Compile l'application pour la production (`dist/`) |
+| `npm test` | Lance les tests unitaires avec Karma |
+
+---
+
+## 📝 Notes Techniques
+
+- **CORS** : Si vous utilisez un backend personnalisé, assurez-vous d'autoriser les requêtes venant de `http://localhost:4200`.
+- **Mappage des données** : L'application gère automatiquement la conversion entre le modèle de données Front (camelCase) et les attentes du Backend.
+- **Sécurité** : Un intercepteur HTTP est inclus pour nettoyer les références circulaires lors des échanges avec l'API.
+
+---
+Développé avec ❤️ pour les passionnés de généalogie.
 
