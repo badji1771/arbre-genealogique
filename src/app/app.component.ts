@@ -20,13 +20,9 @@ import { JsonDatabaseService } from "./services/json-database.service";
 import { JsonManagerComponent } from "./components/json-manager/json-manager.component";
 import {GuideService} from "./services/GuideService";
 import {GuideComponent} from "./components/guide/guide.component";
+import { ToastService } from './services/toast.service';
+import { ConfirmationModalComponent } from './components/confirmation-modal/confirmation-modal.component';
 
-interface Toast {
-  id: number;
-  message: string;
-  type: 'success' | 'error' | 'info' | 'warning';
-  icon: string;
-}
 
 interface QuickOption {
   id: string;
@@ -49,7 +45,8 @@ interface QuickOption {
     FormsModule,
     ReactiveFormsModule,
     JsonManagerComponent,
-    GuideComponent
+    GuideComponent,
+    ConfirmationModalComponent
   ],
   styleUrls: ['./app.component.css']
 })
@@ -59,6 +56,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   selectedFamily: Family | null = null;
   selectedPerson: Person | null = null;
   guideService = inject(GuideService);
+  toastService = inject(ToastService);
 
 
   showJsonManager = false;
@@ -86,17 +84,13 @@ export class AppComponent implements OnInit, AfterViewInit {
   collapsedLevels: Set<number> = new Set<number>();
   maxLevel = 0;
 
-  // Nouvelles propriétés pour l'interface améliorée
-  toasts: Toast[] = [];
-  toastId = 0;
-
 // Ajouter dans la classe
   @ViewChild('guideComponent') guideComponent!: GuideComponent;
 
 // Mettre à jour la méthode showGuide()
   showGuide(): void {
     this.guideComponent.show();
-    this.showToast('Guide ouvert', 'info', '📖');
+    this.toastService.info('Guide ouvert', '📖');
   }
 
   // Options de démarrage rapide
@@ -151,7 +145,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     const isFirstVisit = !localStorage.getItem('hasVisitedBefore');
     if (isFirstVisit) {
       setTimeout(() => {
-        this.showToast('Bienvenue dans Arbre Généalogique !', 'info', '🎉');
+        this.toastService.show('Bienvenue dans Arbre Généalogique !', 'info', '🎉');
         localStorage.setItem('hasVisitedBefore', 'true');
       }, 1000);
     }
@@ -235,7 +229,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         }, 50);
       }, 10);
 
-      this.showToast('Menu Actions ouvert', 'info', '📋');
+      this.toastService.show('Menu Actions ouvert', 'info', '📋');
     }
   }
 
@@ -252,7 +246,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       // Restaurer le défilement
       document.body.style.overflow = '';
 
-      this.showToast('Menu Actions fermé', 'info', '📋');
+      this.toastService.show('Menu Actions fermé', 'info', '📋');
     }
   }
 
@@ -281,10 +275,10 @@ export class AppComponent implements OnInit, AfterViewInit {
   exportCurrentFamily(): void {
     if (this.selectedFamily) {
       this.excelExportService.exportFamilyToExcel(this.selectedFamily);
-      this.showToast(`"${this.selectedFamily.name}" exportée en Excel`, 'success', '📊');
+      this.toastService.show(`"${this.selectedFamily.name}" exportée en Excel`, 'success', '📊');
       this.closeActionsMenu();
     } else {
-      this.showToast('Veuillez sélectionner une famille d\'abord', 'warning', '⚠️');
+      this.toastService.show('Veuillez sélectionner une famille d\'abord', 'warning', '⚠️');
     }
   }
 
@@ -298,20 +292,20 @@ export class AppComponent implements OnInit, AfterViewInit {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      this.showToast(`"${this.selectedFamily.name}" exportée en JSON`, 'success', '💾');
+      this.toastService.show(`"${this.selectedFamily.name}" exportée en JSON`, 'success', '💾');
       this.closeActionsMenu();
     } else {
-      this.showToast('Veuillez sélectionner une famille d\'abord', 'warning', '⚠️');
+      this.toastService.show('Veuillez sélectionner une famille d\'abord', 'warning', '⚠️');
     }
   }
 
   exportStatistics(): void {
     if (this.families.length > 0) {
       this.excelExportService.exportStatistics(this.families);
-      this.showToast('Statistiques exportées', 'success', '📈');
+      this.toastService.show('Statistiques exportées', 'success', '📈');
       this.closeActionsMenu();
     } else {
-      this.showToast('Aucune donnée à exporter', 'info', 'ℹ️');
+      this.toastService.show('Aucune donnée à exporter', 'info', 'ℹ️');
     }
   }
 
@@ -328,24 +322,24 @@ export class AppComponent implements OnInit, AfterViewInit {
       if (navigator.share) {
         navigator.share(shareData)
           .then(() => {
-            this.showToast('Partage réussi', 'success', '✅');
+            this.toastService.show('Partage réussi', 'success', '✅');
             this.closeActionsMenu();
           })
           .catch(() => {
-            this.showToast('Partage annulé', 'info', 'ℹ️');
+            this.toastService.show('Partage annulé', 'info', 'ℹ️');
           });
       } else {
         navigator.clipboard.writeText(window.location.href)
           .then(() => {
-            this.showToast('Lien copié dans le presse-papier', 'success', '📋');
+            this.toastService.show('Lien copié dans le presse-papier', 'success', '📋');
             this.closeActionsMenu();
           })
           .catch(() => {
-            this.showToast('Impossible de copier le lien', 'error', '❌');
+            this.toastService.show('Impossible de copier le lien', 'error', '❌');
           });
       }
     } else {
-      this.showToast('Veuillez sélectionner une famille d\'abord', 'warning', '⚠️');
+      this.toastService.show('Veuillez sélectionner une famille d\'abord', 'warning', '⚠️');
     }
   }
 
@@ -358,18 +352,18 @@ export class AppComponent implements OnInit, AfterViewInit {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    this.showToast('Sauvegarde créée avec succès', 'success', '💾');
+    this.toastService.show('Sauvegarde créée avec succès', 'success', '💾');
     this.closeActionsMenu();
   }
 
   openJsonManagerAction(): void {
     this.showJsonManager = true;
-    this.showToast('Gestion JSON ouverte', 'info', '📁');
+    this.toastService.show('Gestion JSON ouverte', 'info', '📁');
     this.closeActionsMenu();
   }
 
   importFromGedcomAction(): void {
-    this.showToast('Import GEDCOM - Fonctionnalité à venir', 'info', '📤');
+    this.toastService.show('Import GEDCOM - Fonctionnalité à venir', 'info', '📤');
     this.closeActionsMenu();
   }
 
@@ -378,7 +372,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       this.jsonDb.clearAllData();
       this.selectedFamily = null;
       this.selectedPerson = null;
-      this.showToast('Toutes les données ont été effacées', 'warning', '🗑️');
+      this.toastService.show('Toutes les données ont été effacées', 'warning', '🗑️');
       this.closeActionsMenu();
     }
   }
@@ -423,7 +417,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
 
   manageFamily(): void {
-    this.showToast('Gestion de famille - Fonctionnalité à venir', 'info', '⚙️');
+    this.toastService.show('Gestion de famille - Fonctionnalité à venir', 'info', '⚙️');
   }
 
   // === MÉTHODES POUR LA SIDEBAR ===
@@ -437,7 +431,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   quickView(family: Family): void {
     this.selectFamily(family);
-    this.showToast(`Vue rapide de ${family.name}`, 'info', '👁️');
+    this.toastService.show(`Vue rapide de ${family.name}`, 'info', '👁️');
   }
 
   addNewFamily(): void {
@@ -446,7 +440,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       this.jsonDb.selectFamily(family);
       this.newFamilyName = '';
       this.showAddFamily = false;
-      this.showToast('Nouvelle famille créée', 'success', '✅');
+      this.toastService.show('Nouvelle famille créée', 'success', '✅');
     }
   }
 
@@ -454,7 +448,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   openSample(): void {
     const sampleFamily = this.jsonDb.createSampleFamily();
     this.selectFamily(sampleFamily);
-    this.showToast('Exemple chargé avec succès', 'success', '✅');
+    this.toastService.show('Exemple chargé avec succès', 'success', '✅');
   }
 
   startWithTemplate(template: string): void {
@@ -470,11 +464,11 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     const family = this.jsonDb.addFamily(familyName);
     this.jsonDb.selectFamily(family);
-    this.showToast(`${familyName} créé avec succès`, 'success', '✅');
+    this.toastService.show(`${familyName} créé avec succès`, 'success', '✅');
   }
 
   importFromGedcom(): void {
-    this.showToast('Import GEDCOM - Fonctionnalité à venir', 'info', '📤');
+    this.toastService.show('Import GEDCOM - Fonctionnalité à venir', 'info', '📤');
   }
 
   openTutorial(): void {
@@ -486,7 +480,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       } else if (this.guideComponent) {
         this.guideComponent.show();
       }
-      this.showToast('Ouverture du guide', 'info', '📖');
+      this.toastService.show('Ouverture du guide', 'info', '📖');
     } catch (e) {
       // En cas d'erreur, afficher au moins l'aperçu du guide
       if (this.guideComponent) {
@@ -498,7 +492,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   // === MÉTHODES POUR LE TABLEAU DE BORD FAMILLE ===
   setView(view: 'tree' | 'list' | 'timeline' | 'map'): void {
     this.currentView = view;
-    this.showToast(`Vue ${this.getViewLabel(view)} activée`, 'info', this.getViewIcon(view));
+    this.toastService.show(`Vue ${this.getViewLabel(view)} activée`, 'info', this.getViewIcon(view));
   }
 
   private getViewLabel(view: string): string {
@@ -523,12 +517,12 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   expandAll(): void {
     this.expandAllGenerations();
-    this.showToast('Toutes les générations développées', 'success', '⬇️');
+    this.toastService.show('Toutes les générations développées', 'success', '⬇️');
   }
 
   collapseAll(): void {
     this.collapseAllGenerations();
-    this.showToast('Toutes les générations réduites', 'success', '➡️');
+    this.toastService.show('Toutes les générations réduites', 'success', '➡️');
   }
 
   toggleViewMode(): void {
@@ -536,7 +530,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     const message = this.showAllGenerations ?
       'Affichage de toutes les générations' :
       'Affichage sélectif des générations';
-    this.showToast(message, 'info', '🔄');
+    this.toastService.show(message, 'info', '🔄');
   }
 
   duplicateFamily(): void {
@@ -544,7 +538,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       const duplicated = this.jsonDb.duplicateFamily(this.selectedFamily.id);
       if (duplicated) {
         this.selectFamily(duplicated);
-        this.showToast('Famille dupliquée avec succès', 'success', '⎘');
+        this.toastService.show('Famille dupliquée avec succès', 'success', '⎘');
       }
     }
   }
@@ -554,7 +548,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       const newName = prompt('Nouveau nom de la famille :', this.selectedFamily.name);
       if (newName && newName.trim() && newName !== this.selectedFamily.name) {
         this.jsonDb.updateFamilyName(this.selectedFamily.id, newName.trim());
-        this.showToast('Nom de famille modifié', 'success', '✏️');
+        this.toastService.show('Nom de famille modifié', 'success', '✏️');
       }
     }
   }
@@ -563,7 +557,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     if (this.selectedFamily && confirm(`Supprimer définitivement "${this.selectedFamily.name}" ?`)) {
       this.jsonDb.deleteFamily(this.selectedFamily.id);
       this.selectedFamily = null;
-      this.showToast('Famille supprimée', 'warning', '🗑️');
+      this.toastService.show('Famille supprimée', 'warning', '🗑️');
     }
   }
 
@@ -573,14 +567,14 @@ export class AppComponent implements OnInit, AfterViewInit {
     const message = this.sidebarCollapsed ?
       'Sidebar réduite' :
       'Sidebar étendue';
-    this.showToast(message, 'info', '↔️');
+    this.toastService.show(message, 'info', '↔️');
   }
 
   addQuickPerson(): void {
     if (this.selectedFamily) {
       this.openAddPersonModal();
     } else {
-      this.showToast('Veuillez d\'abord sélectionner une famille', 'warning', '🏠');
+      this.toastService.show('Veuillez d\'abord sélectionner une famille', 'warning', '🏠');
     }
   }
 
@@ -590,13 +584,13 @@ export class AppComponent implements OnInit, AfterViewInit {
       if (searchTerm && searchTerm.trim()) {
         const results = this.jsonDb.searchPerson(searchTerm.trim());
         if (results.length > 0) {
-          this.showToast(`${results.length} résultat(s) trouvé(s)`, 'success', '🔍');
+          this.toastService.show(`${results.length} résultat(s) trouvé(s)`, 'success', '🔍');
         } else {
-          this.showToast('Aucun résultat trouvé', 'info', '🔍');
+          this.toastService.show('Aucun résultat trouvé', 'info', '🔍');
         }
       }
     } else {
-      this.showToast('Veuillez d\'abord sélectionner une famille', 'warning', '🏠');
+      this.toastService.show('Veuillez d\'abord sélectionner une famille', 'warning', '🏠');
     }
   }
 
@@ -613,34 +607,6 @@ export class AppComponent implements OnInit, AfterViewInit {
         behavior: 'smooth'
       });
     }
-  }
-
-  // === MÉTHODES DE TOAST ===
-  showToast(message: string, type: Toast['type'] = 'info', icon?: string): void {
-    const toastIcons = {
-      success: '✅',
-      error: '❌',
-      info: 'ℹ️',
-      warning: '⚠️'
-    };
-
-    const toast: Toast = {
-      id: this.toastId++,
-      message,
-      type,
-      icon: icon || toastIcons[type]
-    };
-
-    this.toasts.push(toast);
-
-    // Auto-dismiss après 3 secondes
-    setTimeout(() => {
-      this.dismissToast(toast);
-    }, 3000);
-  }
-
-  dismissToast(toast: Toast): void {
-    this.toasts = this.toasts.filter(t => t.id !== toast.id);
   }
 
   // === MÉTHODES DE STATISTIQUES ===
@@ -832,17 +798,17 @@ export class AppComponent implements OnInit, AfterViewInit {
   // === MÉTHODES DE GESTION DES FAMILLES ===
   selectFamily(family: Family): void {
     this.jsonDb.selectFamily(family);
-    this.showToast(`Famille "${family.name}" sélectionnée`, 'success', '🏠');
+    this.toastService.show(`Famille "${family.name}" sélectionnée`, 'success', '🏠');
   }
 
   openJsonManager(): void {
     this.showJsonManager = true;
-    this.showToast('Gestion JSON ouverte', 'info', '📁');
+    this.toastService.show('Gestion JSON ouverte', 'info', '📁');
   }
 
   closeJsonManager(): void {
     this.showJsonManager = false;
-    this.showToast('Gestion JSON fermée', 'info', '📁');
+    this.toastService.show('Gestion JSON fermée', 'info', '📁');
   }
 
   deletePerson(personId: number): void {
@@ -851,7 +817,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       if (this.selectedPerson?.id === personId) {
         this.selectedPerson = null;
       }
-      this.showToast('Personne supprimée', 'warning', '🗑️');
+      this.toastService.show('Personne supprimée', 'warning', '🗑️');
     }
   }
 
@@ -990,7 +956,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   exportAllFamilies(): void {
     if (this.families.length > 0) {
       this.excelExportService.exportMultipleFamilies(this.families);
-      this.showToast('Toutes les familles exportées', 'success', '📂');
+      this.toastService.show('Toutes les familles exportées', 'success', '📂');
     }
   }
 
@@ -1005,12 +971,12 @@ export class AppComponent implements OnInit, AfterViewInit {
           const success = this.jsonDb.importFromJson(jsonData);
 
           if (success) {
-            this.showToast('Données importées avec succès', 'success', '📤');
+            this.toastService.show('Données importées avec succès', 'success', '📤');
           } else {
-            this.showToast('Format JSON invalide', 'error', '❌');
+            this.toastService.show('Format JSON invalide', 'error', '❌');
           }
         } catch (error) {
-          this.showToast('Erreur lors de l\'import', 'error', '❌');
+          this.toastService.show('Erreur lors de l\'import', 'error', '❌');
           console.error(error);
         }
       };
@@ -1101,7 +1067,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     if (this.selectedFamily) {
       this.jsonDb.addPerson(formData, this.selectedFamily.id);
       this.closePersonModal();
-      this.showToast('Personne ajoutée avec succès', 'success', '👤');
+      this.toastService.show('Personne ajoutée avec succès', 'success', '👤');
     }
   }
 
@@ -1113,25 +1079,25 @@ export class AppComponent implements OnInit, AfterViewInit {
         this.selectedFamily.id
       );
       this.closePersonModal();
-      this.showToast('Personne mise à jour', 'success', '✅');
+      this.toastService.show('Personne mise à jour', 'success', '✅');
     }
   }
 
   // Ajoutez une méthode pour la galerie
   openPhotoGallery(person: Person): void {
     if (!person.photo) {
-      this.showToast(`${person.prenom} n'a pas de photo`, 'info', '📷');
+      this.toastService.show(`${person.prenom} n'a pas de photo`, 'info', '📷');
       return;
     }
 
     // Ouvrir un modal ou une vue agrandie de la photo
-    this.showToast(`Photo de ${person.prenom} ${person.nom}`, 'info', '🖼️');
+    this.toastService.show(`Photo de ${person.prenom} ${person.nom}`, 'info', '🖼️');
   }
 
   // Ajoutez une méthode pour télécharger la photo
   downloadPersonPhoto(person: Person): void {
     if (!person.photo) {
-      this.showToast('Aucune photo à télécharger', 'warning', '📷');
+      this.toastService.show('Aucune photo à télécharger', 'warning', '📷');
       return;
     }
 
@@ -1142,14 +1108,14 @@ export class AppComponent implements OnInit, AfterViewInit {
     link.click();
     document.body.removeChild(link);
 
-    this.showToast('Photo téléchargée', 'success', '⬇️');
+    this.toastService.show('Photo téléchargée', 'success', '⬇️');
   }
 
   onViewDetails(person: Person): void {
     this.selectedPerson = person;
 
     // Si vous avez une sidebar de détails, vous pouvez l'ouvrir ici
-    this.showToast(`Détails de ${person.prenom} ${person.nom}`, 'info', '👁️');
+    this.toastService.show(`Détails de ${person.prenom} ${person.nom}`, 'info', '👁️');
 
     // Optionnel : Scroll vers la sidebar si elle est hors écran
     setTimeout(() => {
@@ -1165,7 +1131,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     event.stopPropagation();
 
     // Créer un menu contextuel ou utiliser un toast
-    this.showToast(
+    this.toastService.show(
       `${person.prenom} ${person.nom} - Sélectionnez une action`,
       'info',
       '⚙️'
@@ -1267,9 +1233,9 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   copyToClipboard(text: string): void {
     navigator.clipboard.writeText(text).then(() => {
-      this.showToast('Copié dans le presse-papier', 'success', '📋');
+      this.toastService.show('Copié dans le presse-papier', 'success', '📋');
     }).catch(() => {
-      this.showToast('Erreur lors de la copie', 'error', '❌');
+      this.toastService.show('Erreur lors de la copie', 'error', '❌');
     });
   }
 
@@ -1287,8 +1253,8 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     if (navigator.share) {
       navigator.share(shareData)
-        .then(() => this.showToast('Partage réussi', 'success', '✅'))
-        .catch(() => this.showToast('Partage annulé', 'info', 'ℹ️'));
+        .then(() => this.toastService.show('Partage réussi', 'success', '✅'))
+        .catch(() => this.toastService.show('Partage annulé', 'info', 'ℹ️'));
     } else {
       this.copyToClipboard(window.location.href);
     }
@@ -1296,19 +1262,16 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   duplicatePerson(person: Person): void {
     // Logique de duplication
-    this.showToast('Duplication (fonctionnalité à venir)', 'info', '⎘');
+    this.toastService.show('Duplication (fonctionnalité à venir)', 'info', '⎘');
   }
 
   exportPersonData(person: Person): void {
-    // Logique d'export de fiche personnelle
-    const data = JSON.stringify(person, null, 2);
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${person.prenom}_${person.nom}_fiche.json`;
-    a.click();
-    this.showToast('Fiche exportée', 'success', '📄');
+    if (this.selectedFamily) {
+      this.excelExportService.exportPersonToExcel(person, this.selectedFamily);
+      this.toastService.show(`Fiche de ${person.prenom} exportée`, 'success', '📄');
+    } else {
+      this.toastService.show('Erreur: aucune famille sélectionnée', 'error', '⚠️');
+    }
   }
 
   // Animation pour le bouton ajouter
@@ -1396,24 +1359,24 @@ export class AppComponent implements OnInit, AfterViewInit {
       if (navigator.share) {
         navigator.share(shareData)
           .then(() => {
-            this.showToast('Partage réussi', 'success', '✅');
+            this.toastService.show('Partage réussi', 'success', '✅');
             this.closeActionsMenu();
           })
           .catch(() => {
-            this.showToast('Partage annulé', 'info', 'ℹ️');
+            this.toastService.show('Partage annulé', 'info', 'ℹ️');
           });
       } else {
         navigator.clipboard.writeText(window.location.href)
           .then(() => {
-            this.showToast('Lien copié dans le presse-papier', 'success', '📋');
+            this.toastService.show('Lien copié dans le presse-papier', 'success', '📋');
             this.closeActionsMenu();
           })
           .catch(() => {
-            this.showToast('Impossible de copier le lien', 'error', '❌');
+            this.toastService.show('Impossible de copier le lien', 'error', '❌');
           });
       }
     } else {
-      this.showToast('Veuillez sélectionner une famille d\'abord', 'warning', '⚠️');
+      this.toastService.show('Veuillez sélectionner une famille d\'abord', 'warning', '⚠️');
     }
   }
 }

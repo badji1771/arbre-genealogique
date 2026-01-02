@@ -2105,6 +2105,16 @@ body {
   border-right: 1px solid #e0e0e0;
   padding: 1.5rem;
   overflow-y: auto;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.sidebar-collapsed .modern-sidebar {
+  width: 0;
+  padding: 0;
+  overflow: hidden;
+  border-right: none;
+  opacity: 0;
 }
 
 .section-header {
@@ -5052,6 +5062,34 @@ body > .actions-dropdown-portal {
 .btn-import .btn-icon { font-size: 16px; }
 .btn-import:hover { background: var(--info-dark); box-shadow: var(--shadow); }
 .btn-import:active { transform: translateY(1px); box-shadow: var(--shadow-xs); }
+
+/* Toggle sidebar button in header */
+.btn-toggle-sidebar-top {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--white);
+  color: var(--gray-600);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-xs);
+  cursor: pointer;
+  transition: all .2s ease;
+}
+.btn-toggle-sidebar-top:hover {
+  background: var(--gray-50);
+  color: var(--primary);
+  border-color: var(--primary-light);
+  box-shadow: var(--shadow-sm);
+}
+.btn-toggle-sidebar-top:active {
+  transform: translateY(1px);
+}
+.btn-toggle-sidebar-top .btn-icon {
+  font-size: 18px;
+}
 
 /* Guide indicator (progress + icon) */
 .guide-indicator {

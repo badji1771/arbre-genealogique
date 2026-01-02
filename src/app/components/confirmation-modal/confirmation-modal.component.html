@@ -1,0 +1,19 @@
+<div class="modal-overlay" *ngIf="show">
+  <div class="modal-container" [class]="options?.type || 'info'">
+    <div class="modal-header">
+      <div class="header-icon">{{ getIcon() }}</div>
+      <h3>{{ options?.title }}</h3>
+    </div>
+    <div class="modal-body">
+      <p>{{ options?.message }}</p>
+    </div>
+    <div class="modal-footer">
+      <button *ngIf="options?.cancelText" class="btn-cancel" (click)="cancel()">
+        {{ options?.cancelText }}
+      </button>
+      <button class="btn-confirm" (click)="confirm()">
+        {{ options?.confirmText || 'Confirmer' }}
+      </button>
+    </div>
+  </div>
+</div>

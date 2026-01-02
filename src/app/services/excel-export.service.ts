@@ -12,22 +12,10 @@ export class ExcelExportService {
     const allPersons: any[] = [];
     this.flattenTree(family.members, allPersons, 0);
 
-    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(allPersons);
+    // 1. Créer une feuille de calcul vide
+    const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([]);
 
-    const wscols = [
-      { wch: 25 },
-      { wch: 15 },
-      { wch: 20 },
-      { wch: 10 },
-      { wch: 20 },
-      { wch: 30 },
-      { wch: 40 },
-      { wch: 15 },
-      { wch: 30 },
-      { wch: 10 },
-    ];
-    ws['!cols'] = wscols;
-
+    // 2. Définir les en-têtes
     const header = [
       ['Arbre Généalogique - Famille ' + family.name],
       ['Exporté le ' + new Date().toLocaleDateString('fr-FR')],
@@ -35,30 +23,38 @@ export class ExcelExportService {
       ['NOM COMPLET', 'PRÉNOM', 'NOM', 'GENRE', 'TÉLÉPHONE', 'EMAIL', 'ADRESSE', 'GÉNÉRATION', 'PARENT', 'ENFANTS']
     ];
 
-    const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+    // 3. Ajouter les en-têtes à partir de A1
     XLSX.utils.sheet_add_aoa(ws, header, { origin: 'A1' });
-    range.e.r += header.length;
 
-    const dataStart = header.length + 1;
-    const newData = XLSX.utils.sheet_to_json(ws, { header: 1 });
+    // 4. Ajouter les données à partir de la ligne 5 (A5), en ignorant les en-têtes automatiques de json
+    XLSX.utils.sheet_add_json(ws, allPersons, { origin: 'A5', skipHeader: true });
+
+    // 5. Configurer la largeur des colonnes
+    const wscols = [
+      { wch: 25 }, // Nom Complet
+      { wch: 15 }, // Prénom
+      { wch: 20 }, // Nom
+      { wch: 10 }, // Genre
+      { wch: 20 }, // Téléphone
+      { wch: 30 }, // Email
+      { wch: 40 }, // Adresse
+      { wch: 15 }, // Génération
+      { wch: 30 }, // Parent
+      { wch: 10 }, // Enfants
+    ];
+    ws['!cols'] = wscols;
+
+    // 6. Style pour les en-têtes (Note: XLSX community edition ne supporte pas les styles dans .xlsx,
+    // mais on garde la logique si une version pro ou un plugin est utilisé, ou pour la structure)
+    // Nous définissons au moins le ref correctement
+    const lastRow = 4 + allPersons.length;
     ws['!ref'] = XLSX.utils.encode_range({
       s: { r: 0, c: 0 },
-      e: { r: newData.length + dataStart - 1, c: 9 }
+      e: { r: lastRow - 1, c: 9 }
     });
 
-    const headerRange = XLSX.utils.decode_range('A4:J4');
-    for (let C = headerRange.s.c; C <= headerRange.e.c; ++C) {
-      const address = XLSX.utils.encode_cell({ r: 3, c: C });
-      if (!ws[address]) continue;
-      ws[address].s = {
-        font: { bold: true, color: { rgb: 'FFFFFF' } },
-        fill: { fgColor: { rgb: '4F46E5' } },
-        alignment: { horizontal: 'center', vertical: 'center' }
-      };
-    }
-
     const wb: XLSX.WorkBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Famille ' + family.name);
+    XLSX.utils.book_append_sheet(wb, ws, 'Famille ' + family.name.substring(0, 20));
 
     const excelBuffer: any = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
     const data: Blob = new Blob([excelBuffer], {
@@ -76,10 +72,20 @@ export class ExcelExportService {
       this.flattenTree(family.members, allPersons, 0);
 
       if (allPersons.length > 0) {
-        const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(allPersons);
-
-        const header = [['Famille: ' + family.name], [], ['Nom Complet', 'Prénom', 'Nom', 'Genre', 'Téléphone', 'Email', 'Adresse', 'Génération', 'Parent', 'Enfants']];
+        const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([]);
+        const header = [
+          ['Famille: ' + family.name],
+          [],
+          ['NOM COMPLET', 'PRÉNOM', 'NOM', 'GENRE', 'TÉLÉPHONE', 'EMAIL', 'ADRESSE', 'GÉNÉRATION', 'PARENT', 'ENFANTS']
+        ];
         XLSX.utils.sheet_add_aoa(ws, header, { origin: 'A1' });
+        XLSX.utils.sheet_add_json(ws, allPersons, { origin: 'A4', skipHeader: true });
+
+        // Ajuster colonnes
+        ws['!cols'] = [
+          { wch: 25 }, { wch: 15 }, { wch: 20 }, { wch: 10 }, { wch: 20 },
+          { wch: 30 }, { wch: 40 }, { wch: 15 }, { wch: 30 }, { wch: 10 }
+        ];
 
         XLSX.utils.book_append_sheet(wb, ws, family.name.substring(0, 31));
       }
@@ -93,6 +99,79 @@ export class ExcelExportService {
     saveAs(data, `arbres-genealogiques-${new Date().getTime()}.xlsx`);
   }
 
+  exportPersonToExcel(person: Person, family: Family): void {
+    const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([]);
+
+    let parentName = 'Fondateur';
+    if (person.parentId) {
+      const parent = this.findPersonInTree(family.members, person.parentId);
+      if (parent) {
+        parentName = `${parent.prenom} ${parent.nom}`;
+      } else {
+        parentName = 'Inconnu (ID: ' + person.parentId + ')';
+      }
+    }
+
+    const childrenNames = person.children && person.children.length > 0
+      ? person.children.map(c => `${c.prenom} ${c.nom}`).join(', ')
+      : 'Aucun';
+
+    const data = [
+      ['FICHE INDIVIDUELLE'],
+      ['Famille: ' + family.name],
+      ['Date d\'export: ' + new Date().toLocaleDateString('fr-FR')],
+      [],
+      ['INFORMATIONS PERSONNELLES'],
+      ['Nom Complet', `${person.prenom} ${person.nom}`],
+      ['Prénom', person.prenom],
+      ['Nom', person.nom],
+      ['Genre', person.genre === 'homme' ? 'Homme' : 'Femme'],
+      ['Date de naissance', person.dateNaissance ? new Date(person.dateNaissance).toLocaleDateString('fr-FR') : 'Non renseignée'],
+      ['Profession', person.profession || 'Non renseignée'],
+      [],
+      ['COORDONNÉES'],
+      ['Téléphone', person.telephone || 'Non renseigné'],
+      ['Email', person.email || 'Non renseigné'],
+      ['Adresse', person.adresse || 'Non renseignée'],
+      [],
+      ['RELATIONS FAMILIALES'],
+      ['Parent direct', parentName],
+      ['Enfants', childrenNames],
+      [],
+      ['NOTES'],
+      [person.notes || 'Aucune note particulière.']
+    ];
+
+    XLSX.utils.sheet_add_aoa(ws, data, { origin: 'A1' });
+
+    // Ajuster la largeur des colonnes
+    ws['!cols'] = [
+      { wch: 25 }, // Colonne A (Labels)
+      { wch: 50 }  // Colonne B (Valeurs)
+    ];
+
+    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, `${person.prenom} ${person.nom}`.substring(0, 31));
+
+    const excelBuffer: any = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const blob: Blob = new Blob([excelBuffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8'
+    });
+
+    saveAs(blob, `fiche-${person.prenom.toLowerCase()}-${person.nom.toLowerCase()}.xlsx`);
+  }
+
+  private findPersonInTree(persons: Person[], id: number): Person | undefined {
+    for (const p of persons) {
+      if (p.id === id) return p;
+      if (p.children && p.children.length > 0) {
+        const found = this.findPersonInTree(p.children, id);
+        if (found) return found;
+      }
+    }
+    return undefined;
+  }
+
   private flattenTree(persons: Person[], result: any[], level: number, parentName: string = ''): void {
     persons.forEach(person => {
       const fullName = `${person.prenom} ${person.nom}`;
@@ -100,16 +179,16 @@ export class ExcelExportService {
       const childrenCount = person.children ? person.children.length : 0;
 
       result.push({
-        'Nom Complet': fullName,
-        'Prénom': person.prenom,
-        'Nom': person.nom,
-        'Genre': person.genre === 'homme' ? 'Homme' : 'Femme',
-        'Téléphone': person.telephone || '',
-        'Email': person.email || '',
-        'Adresse': person.adresse || '',
-        'Génération': `Niveau ${level + 1}`,
-        'Parent': parent,
-        'Enfants': childrenCount
+        'NOM COMPLET': fullName,
+        'PRÉNOM': person.prenom,
+        'NOM': person.nom,
+        'GENRE': person.genre === 'homme' ? 'Homme' : 'Femme',
+        'TÉLÉPHONE': person.telephone || '',
+        'EMAIL': person.email || '',
+        'ADRESSE': person.adresse || '',
+        'GÉNÉRATION': `Niveau ${level + 1}`,
+        'PARENT': parent,
+        'ENFANTS': childrenCount
       });
 
       if (person.children && person.children.length > 0) {

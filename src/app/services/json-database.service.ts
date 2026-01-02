@@ -3,6 +3,8 @@ import { Injectable } from '@angular/core';
 import { Family, Person } from '../models/person.model';
 import { BehaviorSubject } from 'rxjs';
 import { ApiService, FamilyDto, PersonDto } from './api.service';
+import { ToastService } from './toast.service';
+import { ConfirmationService } from './confirmation.service';
 
 @Injectable({
   providedIn: 'root'
@@ -20,8 +22,9 @@ export class JsonDatabaseService {
 
   private families: Family[] = [];
   private memberCounts = new Map<number, number>(); // cache des nombres de membres par famille
+  private backendAvailable = true;
 
-  constructor(private api: ApiService) {
+  constructor(private api: ApiService, private toast: ToastService, private confirmation: ConfirmationService) {
     if (this.isBackendMode()) {
       this.loadFromBackend();
     } else {
@@ -33,6 +36,7 @@ export class JsonDatabaseService {
   // === Backend toggle and loaders ===
   private isBackendMode(): boolean {
     // Backend enabled by default. Set localStorage 'useBackend' to 'false' to force local mode.
+    if (!this.backendAvailable) return false;
     const flag = localStorage.getItem('useBackend');
     return flag !== 'false';
   }
@@ -54,13 +58,27 @@ export class JsonDatabaseService {
           this.selectFamily(this.families[0]);
         }
       },
-      error: (e) => {
-        console.error('Backend non disponible, retour au mode local', e);
-        // fallback: charger le local
-        this.loadFromLocalStorage();
-        this.setupAutoSave();
-      }
+      error: (e) => this.handleBackendError(e)
     });
+  }
+
+  private handleBackendError(e: any): void {
+    console.error('Backend non disponible ou erreur, retour au mode local', e);
+    if (this.backendAvailable) {
+      this.backendAvailable = false;
+
+      this.confirmation.confirm({
+        title: 'Serveur indisponible',
+        message: 'Le serveur backend est actuellement injoignable. Vous pouvez continuer à travailler en mode local, mais sachez que vos données seront stockées uniquement dans votre navigateur et pourraient disparaitre si vous videz votre cache.',
+        confirmText: 'Compris',
+        type: 'warning'
+      });
+
+      this.toast.warning('Backend non disponible, passage en mode local');
+      // charger le local si on n'est pas déjà en train de l'utiliser
+      this.loadFromLocalStorage();
+      this.setupAutoSave();
+    }
   }
 
   private dtoToPerson(dto: PersonDto): Person {
@@ -150,12 +168,15 @@ export class JsonDatabaseService {
             };
             this.families[idx] = real;
             this.familiesSubject.next([...this.families]);
+            this.toast.success(`Famille "${name}" créée avec succès`);
           }
         },
-        error: () => {
+        error: (e) => {
           // rollback
           this.families = this.families.filter(f => f.id !== tempFamily.id);
           this.familiesSubject.next([...this.families]);
+          this.toast.error(`Erreur lors de la création de la famille "${name}"`);
+          this.handleBackendError(e);
         }
       });
       return tempFamily;
@@ -171,6 +192,7 @@ export class JsonDatabaseService {
 
     this.families.push(newFamily);
     this.saveAndNotify();
+    this.toast.success(`Famille "${name}" créée localement`);
     return newFamily;
   }
 
@@ -206,8 +228,15 @@ export class JsonDatabaseService {
         }
       }
       this.api.createPerson(dto).subscribe({
-        next: () => this.refreshFamilyMembersFromBackend(familyId),
-        error: () => this.refreshFamilyMembersFromBackend(familyId)
+        next: () => {
+          this.refreshFamilyMembersFromBackend(familyId);
+          this.toast.success(`${personData.prenom} ${personData.nom} ajouté(e) avec succès`);
+        },
+        error: (e) => {
+          this.refreshFamilyMembersFromBackend(familyId);
+          this.toast.error(`Erreur lors de l'ajout de ${personData.prenom}`);
+          this.handleBackendError(e);
+        }
       });
       return temp;
     }
@@ -229,6 +258,7 @@ export class JsonDatabaseService {
 
     family.updatedAt = new Date();
     this.saveAndNotify();
+    this.toast.success(`${personData.prenom} ${personData.nom} ajouté(e) localement`);
     return newPerson;
   }
 
@@ -283,13 +313,17 @@ export class JsonDatabaseService {
       const patch: Partial<FamilyDto> = {};
       if (typeof updates.name === 'string') patch.name = updates.name;
       this.api.updateFamily(familyId, patch).subscribe({
-        next: () => {},
-        error: () => {
+        next: () => {
+          this.toast.success(`Famille mise à jour`);
+        },
+        error: (e) => {
           // rollback on error
           this.families[familyIndex] = previous;
           this.familiesSubject.next([...this.families]);
           const curr = this.selectedFamilySubject.value;
           if (curr && curr.id === familyId) this.selectedFamilySubject.next({ ...this.families[familyIndex] });
+          this.toast.error(`Erreur lors de la mise à jour de la famille`);
+          this.handleBackendError(e);
         }
       });
       return true;
@@ -303,6 +337,7 @@ export class JsonDatabaseService {
     };
 
     this.saveAndNotify();
+    this.toast.success(`Famille mise à jour localement`);
     return true;
   }
 
@@ -332,8 +367,15 @@ export class JsonDatabaseService {
           }
         }
         this.api.updatePerson(personId, dto).subscribe({
-          next: () => this.refreshFamilyMembersFromBackend(familyId),
-          error: () => this.refreshFamilyMembersFromBackend(familyId)
+          next: () => {
+            this.refreshFamilyMembersFromBackend(familyId);
+            this.toast.success(`Informations mises à jour`);
+          },
+          error: (e) => {
+            this.refreshFamilyMembersFromBackend(familyId);
+            this.toast.error(`Erreur lors de la mise à jour`);
+            this.handleBackendError(e);
+          }
         });
       }
       return changed;
@@ -366,6 +408,7 @@ export class JsonDatabaseService {
     if (updateInTree(family.members)) {
       family.updatedAt = new Date();
       this.saveAndNotify();
+      this.toast.success(`Informations mises à jour localement`);
       return true;
     }
     return false;
@@ -381,11 +424,15 @@ export class JsonDatabaseService {
       }
       this.familiesSubject.next([...this.families]);
       this.api.deleteFamily(familyId).subscribe({
-        next: () => {},
-        error: () => {
+        next: () => {
+          this.toast.success(`Famille supprimée`);
+        },
+        error: (e) => {
           // rollback
           this.families = previous;
           this.familiesSubject.next([...this.families]);
+          this.toast.error(`Erreur lors de la suppression de la famille`);
+          this.handleBackendError(e);
         }
       });
       return true;
@@ -395,11 +442,11 @@ export class JsonDatabaseService {
     this.families = this.families.filter(f => f.id !== familyId);
 
     if (this.families.length < initialLength) {
-      // Si la famille sélectionnée était celle supprimée
       if (this.selectedFamilySubject.value?.id === familyId) {
         this.selectedFamilySubject.next(null);
       }
       this.saveAndNotify();
+      this.toast.success(`Famille supprimée localement`);
       return true;
     }
     return false;
@@ -426,12 +473,17 @@ export class JsonDatabaseService {
       if (current && current.id === fam.id) this.selectedFamilySubject.next({ ...fam });
 
       this.api.deletePerson(personId).subscribe({
-        next: () => this.refreshFamilyMembersFromBackend(familyId),
-        error: () => {
+        next: () => {
+          this.refreshFamilyMembersFromBackend(familyId);
+          this.toast.success(`Personne supprimée`);
+        },
+        error: (e) => {
           // rollback
           fam.members = previousMembers;
           this.familiesSubject.next([...this.families]);
           if (current && current.id === fam.id) this.selectedFamilySubject.next({ ...fam });
+          this.toast.error(`Erreur lors de la suppression`);
+          this.handleBackendError(e);
         }
       });
       return true;
@@ -455,6 +507,7 @@ export class JsonDatabaseService {
     family.members = deleteFromTree(family.members);
     family.updatedAt = new Date();
     this.saveAndNotify();
+    this.toast.success(`Personne supprimée localement`);
     return true;
   }
 
@@ -490,9 +543,11 @@ export class JsonDatabaseService {
       }));
 
       this.saveAndNotify();
+      this.toast.success(`Importation réussie`);
       return true;
     } catch (error) {
       console.error('Erreur lors de l\'import:', error);
+      this.toast.error(`Erreur lors de l'importation: ${error instanceof Error ? error.message : 'Format invalide'}`);
       return false;
     }
   }
@@ -554,7 +609,10 @@ export class JsonDatabaseService {
           }
         }
       },
-      error: (e) => console.error('Erreur chargement personnes backend', e)
+      error: (e) => {
+        console.error('Erreur chargement personnes backend', e);
+        this.handleBackendError(e);
+      }
     });
   }
 

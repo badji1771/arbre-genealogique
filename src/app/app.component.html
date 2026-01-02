@@ -1,4 +1,4 @@
-<div class="app-container modern-home">
+<div class="app-container modern-home" [class.sidebar-collapsed]="sidebarCollapsed">
   <!-- Header simplifié et élégant -->
   <header class="modern-header">
     <div class="header-top">
@@ -18,6 +18,9 @@
         <button class="btn-import" type="button" (click)="triggerImport()" aria-label="Importer des données">
           <span class="btn-icon">📤</span>
           Importer
+        </button>
+        <button class="btn-toggle-sidebar-top" (click)="toggleSidebar()" [title]="sidebarCollapsed ? 'Afficher la barre latérale' : 'Masquer la barre latérale'">
+          <span class="btn-icon">{{ sidebarCollapsed ? '📂' : '📁' }}</span>
         </button>
         <div class="guide-indicator" (click)="showGuide()" title="Guide" role="button" tabindex="0" (keydown.enter)="showGuide()" [attr.aria-label]="'Ouvrir le guide, progression ' + guideService.getProgressPercentage() + '%'">
           <span class="indicator-icon">🎓</span>
@@ -960,8 +963,8 @@
       <span class="nav-icon">↑</span>
     </button>
     <div class="nav-separator"></div>
-    <button class="nav-btn" (click)="toggleSidebar()" title="Familles">
-      <span class="nav-icon">🏠</span>
+    <button class="nav-btn" (click)="toggleSidebar()" [title]="sidebarCollapsed ? 'Afficher la barre latérale' : 'Masquer la barre latérale'">
+      <span class="nav-icon">{{ sidebarCollapsed ? '➡️' : '🏠' }}</span>
     </button>
     <div class="nav-separator"></div>
     <button class="nav-btn" (click)="addQuickPerson()" title="Ajouter rapidement">
@@ -979,12 +982,15 @@
 
   <!-- Notifications toast -->
   <div class="toast-container">
-    <div *ngFor="let toast of toasts" class="toast" [class]="toast.type">
+    <div *ngFor="let toast of toastService.toasts$ | async" class="toast" [class]="toast.type">
       <span class="toast-icon">{{ toast.icon }}</span>
       <span class="toast-message">{{ toast.message }}</span>
-      <button class="toast-close" (click)="dismissToast(toast)">×</button>
+      <button class="toast-close" (click)="toastService.dismiss(toast.id)">×</button>
     </div>
   </div>
+
+  <!-- Modal de confirmation générique -->
+  <app-confirmation-modal></app-confirmation-modal>
 
   <!-- Menu Actions (placé à la racine pour le z-index) -->
   <div class="actions-dropdown-overlay" #globalDropdown (click)="closeActionsMenu($event)"
