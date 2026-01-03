@@ -18,7 +18,7 @@
 
     <!-- Badge genre -->
     <div class="gender-badge" [class.male]="person.genre === 'homme'" [class.female]="person.genre === 'femme'">
-      {{ person.genre === 'homme' ? '👨' : '👩' }}
+      <i class="fas" [class.fa-mars]="person.genre === 'homme'" [class.fa-venus]="person.genre === 'femme'"></i>
     </div>
 
     <!-- Info -->
@@ -29,15 +29,15 @@
       </div>
 
       <div *ngIf="person.profession" class="person-profession">
-        💼 {{ person.profession }}
+        <i class="fas fa-briefcase"></i> {{ person.profession }}
       </div>
 
       <div *ngIf="person.dateNaissance" class="person-age">
-        🎂 {{ getAge() }} ans
+        <i class="fas fa-cake-candles"></i> {{ getAge() }} ans
       </div>
 
       <div *ngIf="person.email" class="person-email" title="Email">
-        📧 {{ person.email | truncate:20 }}
+        <i class="fas fa-envelope"></i> {{ person.email | truncate:20 }}
       </div>
     </div>
 
@@ -45,12 +45,12 @@
     <div *ngIf="person.children && person.children.length > 0"
          class="children-badge"
          title="{{ person.children.length }} enfant(s)">
-      👶 {{ person.children.length }}
+      <i class="fas fa-baby"></i> {{ person.children.length }}
     </div>
 
     <!-- Indicateur photo -->
     <div *ngIf="person.photo" class="photo-indicator" title="Photo disponible">
-      📷
+      <i class="fas fa-camera"></i>
     </div>
   </div>
 
@@ -61,34 +61,34 @@
       class="btn-action btn-add"
       title="Ajouter un enfant"
     >
-      👶
+      <i class="fas fa-baby"></i>
     </button>
     <button
       (click)="onViewDetails($event)"
       class="btn-action btn-view"
       title="Voir détails"
     >
-      👁️
+      <i class="fas fa-eye"></i>
     </button>
     <button
       (click)="onEdit($event)"
       class="btn-action btn-edit"
       title="Modifier"
     >
-      ✏️
+      <i class="fas fa-pencil-alt"></i>
     </button>
     <button
       (click)="onDelete($event)"
       class="btn-action btn-delete"
       title="Supprimer"
     >
-      🗑️
+      <i class="fas fa-trash-alt"></i>
     </button>
   </div>
 
   <!-- Infobulle rapide -->
   <div class="quick-info" *ngIf="person.notes && person.notes.length > 0">
-    <div class="info-icon">📝</div>
+    <div class="info-icon"><i class="fas fa-sticky-note"></i></div>
     <div class="info-text">{{ person.notes | truncate:50 }}</div>
   </div>
 </div>

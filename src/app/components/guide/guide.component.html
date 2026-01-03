@@ -9,10 +9,10 @@
     <!-- En-tête -->
     <div class="guide-header">
       <h2>
-        <span class="header-icon">🎓</span>
+        <span class="header-icon"><i class="fas fa-graduation-cap"></i></span>
         Guide
       </h2>
-      <button class="btn-close" (click)="hide()" title="Fermer">×</button>
+      <button class="btn-close" (click)="hide()" title="Fermer"><i class="fas fa-times"></i></button>
     </div>
 
     <!-- Vue d'ensemble -->
@@ -50,7 +50,7 @@
             (click)="startSection(section.id)"
           >
             <div class="section-header">
-              <div class="section-icon">{{ section.icon }}</div>
+              <div class="section-icon"><i [class]="section.icon"></i></div>
               <div class="section-title">
                 <h4>{{ section.title }}</h4>
                 <p>{{ section.description }}</p>
@@ -65,7 +65,7 @@
             </div>
 
             <div *ngIf="isSectionCompleted(section.id)" class="status-badge">
-              <span>✓</span>
+              <span><i class="fas fa-check"></i></span>
               <span>Terminé</span>
             </div>
           </div>
@@ -73,15 +73,15 @@
 
         <div class="overview-actions">
           <button class="btn btn-primary" (click)="continueGuide()">
-            <span class="btn-icon">▶️</span>
+            <span class="btn-icon"><i class="fas fa-play"></i></span>
             Continuer le guide
           </button>
           <button class="btn btn-outline" (click)="showQuickStartGuide()">
-            <span class="btn-icon">⚡</span>
+            <span class="btn-icon"><i class="fas fa-bolt"></i></span>
             Démarrage rapide
           </button>
           <button class="btn btn-outline" (click)="resetGuide()">
-            <span class="btn-icon">🔄</span>
+            <span class="btn-icon"><i class="fas fa-redo"></i></span>
             Recommencer
           </button>
         </div>
@@ -91,7 +91,7 @@
     <!-- Démarrage rapide -->
     <div class="guide-content" *ngIf="showQuickStart">
       <div class="quickstart-content">
-        <div class="quickstart-icon">⚡</div>
+        <div class="quickstart-icon"><i class="fas fa-bolt"></i></div>
         <h2 class="quickstart-title">Démarrage rapide</h2>
         <p class="quickstart-description">
           Suivez ces 4 étapes pour démarrer rapidement avec votre arbre généalogique
@@ -133,11 +133,11 @@
 
         <div class="step-actions">
           <button class="btn btn-outline" (click)="showOverview = true">
-            <span class="btn-icon">←</span>
+            <span class="btn-icon"><i class="fas fa-arrow-left"></i></span>
             Retour
           </button>
           <button class="btn btn-primary" (click)="startFromBeginning()">
-            <span class="btn-icon">🚀</span>
+            <span class="btn-icon"><i class="fas fa-rocket"></i></span>
             Commencer maintenant
           </button>
         </div>
@@ -147,13 +147,13 @@
     <!-- Étape individuelle -->
     <div class="guide-content" *ngIf="currentStep">
       <div #stepContent class="step-content">
-        <div class="step-icon">{{ currentStep.icon }}</div>
+        <div class="step-icon"><i [class]="currentStep.icon"></i></div>
         <h2 class="step-title">{{ currentStep.title }}</h2>
         <p class="step-description">{{ currentStep.description }}</p>
 
         <div *ngIf="currentSection" class="step-section">
           <div class="section-badge">
-            <span class="section-badge-icon">{{ currentSection.icon }}</span>
+            <span class="section-badge-icon"><i [class]="currentSection.icon"></i></span>
             <span>{{ currentSection.title }}</span>
           </div>
           <p>Section : {{ currentSection.description }}</p>
@@ -161,11 +161,11 @@
 
         <div class="step-actions">
           <button class="btn btn-outline" (click)="skipCurrentStep()">
-            <span class="btn-icon">⏭️</span>
+            <span class="btn-icon"><i class="fas fa-forward"></i></span>
             Passer cette étape
           </button>
           <button class="btn btn-primary" (click)="completeCurrentStep()">
-            <span class="btn-icon">✓</span>
+            <span class="btn-icon"><i class="fas fa-check"></i></span>
             J'ai compris
           </button>
         </div>

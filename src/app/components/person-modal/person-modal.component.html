@@ -3,7 +3,7 @@
     <div class="modal-header">
       <h3 class="modal-title">{{ title }}</h3>
       <button (click)="onClose()" class="modal-close">
-        ✕
+        <i class="fas fa-times"></i>
       </button>
     </div>
 
@@ -18,7 +18,7 @@
     </div>
 
     <div *ngIf="isParent" class="parent-notice">
-      <div class="parent-icon">👨‍👦</div>
+      <div class="parent-icon"><i class="fas fa-child"></i></div>
       <div class="parent-text">
         Ajout en tant qu'enfant de
         <strong>{{ parentName }}</strong>
@@ -30,7 +30,7 @@
       <div class="photo-section">
         <div class="photo-container" (click)="triggerFileInput()">
           <div *ngIf="!photoPreview && !personForm.get('photo')?.value" class="photo-placeholder">
-            <div class="placeholder-icon">📷</div>
+            <div class="placeholder-icon"><i class="fas fa-camera"></i></div>
             <div class="placeholder-text">Cliquez pour ajouter une photo</div>
             <div class="placeholder-hint">JPG, PNG - Max 5MB</div>
           </div>
@@ -100,7 +100,7 @@
                 class="gender-radio"
               />
               <div class="gender-content">
-                <span class="gender-icon">👨</span>
+                <span class="gender-icon"><i class="fas fa-mars"></i></span>
                 <span class="gender-label">Homme</span>
               </div>
             </label>
@@ -112,7 +112,7 @@
                 class="gender-radio"
               />
               <div class="gender-content">
-                <span class="gender-icon">👩</span>
+                <span class="gender-icon"><i class="fas fa-venus"></i></span>
                 <span class="gender-label">Femme</span>
               </div>
             </label>
@@ -120,7 +120,7 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">Date de naissance</label>
+          <label class="form-label"><i class="fas fa-birthday-cake"></i> Date de naissance</label>
           <input
             type="date"
             formControlName="dateNaissance"
@@ -130,7 +130,7 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">Profession</label>
+        <label class="form-label"><i class="fas fa-briefcase"></i> Profession</label>
         <input
           type="text"
           formControlName="profession"
@@ -141,7 +141,7 @@
 
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">📞 Téléphone</label>
+          <label class="form-label"><i class="fas fa-phone"></i> Téléphone</label>
           <input
             type="tel"
             formControlName="telephone"
@@ -151,7 +151,7 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">📧 Email</label>
+          <label class="form-label"><i class="fas fa-envelope"></i> Email</label>
           <input
             type="email"
             formControlName="email"
@@ -166,7 +166,7 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">📍 Adresse</label>
+        <label class="form-label"><i class="fas fa-map-marker-alt"></i> Adresse</label>
         <textarea
           formControlName="adresse"
           placeholder="Entrez l'adresse complète"
@@ -176,7 +176,7 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">📝 Notes</label>
+        <label class="form-label"><i class="fas fa-sticky-note"></i> Notes</label>
         <textarea
           formControlName="notes"
           placeholder="Notes supplémentaires..."
@@ -192,6 +192,7 @@
           [disabled]="!personForm.valid || isProcessing"
         >
           <span *ngIf="isProcessing" class="spinner"></span>
+          <i class="fas fa-save" style="margin-right: 8px;"></i>
           {{ buttonText }}
         </button>
         <button

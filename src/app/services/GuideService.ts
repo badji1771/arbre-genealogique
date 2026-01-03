@@ -23,20 +23,20 @@ export class GuideService {
       id: 'getting-started',
       title: 'Démarrage rapide',
       description: 'Les bases pour commencer votre arbre généalogique',
-      icon: '🚀',
+      icon: 'fas fa-rocket',
       steps: [
         {
           id: 'welcome',
           title: 'Bienvenue',
           description: 'Bienvenue dans l\'application Arbre Généalogique ! Cette guide vous accompagnera dans la découverte des fonctionnalités.',
-          icon: '👋',
+          icon: 'fas fa-hand-wave',
           position: 'center'
         },
         {
           id: 'create-first-family',
           title: 'Créer votre première famille',
           description: 'Commencez par créer une famille pour organiser votre arbre généalogique.',
-          icon: '🏠',
+          icon: 'fas fa-home',
           targetElement: '.btn-add-circle',
           position: 'bottom'
         },
@@ -44,7 +44,7 @@ export class GuideService {
           id: 'add-first-person',
           title: 'Ajouter le premier membre',
           description: 'Ajoutez le fondateur de votre famille en cliquant sur "Ajouter un membre".',
-          icon: '👤',
+          icon: 'fas fa-user-plus',
           targetElement: '.btn-add-member',
           position: 'bottom'
         }
@@ -54,13 +54,13 @@ export class GuideService {
       id: 'family-management',
       title: 'Gestion des familles',
       description: 'Comment organiser et gérer vos familles',
-      icon: '📚',
+      icon: 'fas fa-book-atlas',
       steps: [
         {
           id: 'switch-families',
           title: 'Changer de famille',
           description: 'Cliquez sur une famille dans la barre latérale pour la sélectionner.',
-          icon: '🔄',
+          icon: 'fas fa-exchange-alt',
           targetElement: '.family-card',
           position: 'right'
         },
@@ -68,7 +68,7 @@ export class GuideService {
           id: 'family-actions',
           title: 'Actions rapides',
           description: 'Utilisez le menu Actions pour exporter, dupliquer ou partager votre famille.',
-          icon: '⚡',
+          icon: 'fas fa-bolt',
           targetElement: '.btn-actions',
           position: 'bottom'
         },
@@ -76,7 +76,7 @@ export class GuideService {
           id: 'import-export',
           title: 'Import/Export',
           description: 'Importez des données existantes ou exportez votre arbre au format Excel, JSON.',
-          icon: '📤',
+          icon: 'fas fa-file-export',
           targetElement: '.btn-import',
           position: 'bottom'
         }
@@ -86,21 +86,21 @@ export class GuideService {
       id: 'person-management',
       title: 'Gestion des personnes',
       description: 'Ajouter et modifier les membres de votre famille',
-      icon: '👥',
+      icon: 'fas fa-users-cog',
       steps: [
         {
           id: 'add-children',
           title: 'Ajouter des enfants',
           description: 'Cliquez sur le bouton "Ajouter enfant" sur une carte personne pour ajouter des descendants.',
-          icon: '👶',
+          icon: 'fas fa-baby',
           targetElement: '.member-node',
           position: 'bottom'
         },
         {
           id: 'edit-person',
           title: 'Modifier une personne',
-          description: 'Cliquez sur l\'icône ✏️ pour modifier les informations d\'une personne.',
-          icon: '✏️',
+          description: 'Cliquez sur l\'icône de modification pour changer les informations d\'une personne.',
+          icon: 'fas fa-pencil-alt',
           targetElement: '.btn-action',
           position: 'left'
         },
@@ -108,7 +108,7 @@ export class GuideService {
           id: 'person-details',
           title: 'Voir les détails',
           description: 'Cliquez sur une personne pour afficher ses détails dans la barre latérale.',
-          icon: '📋',
+          icon: 'fas fa-clipboard-list',
           targetElement: '.person-card',
           position: 'right'
         }

@@ -1,31 +1,31 @@
 <!-- components/json-manager/json-manager.component.html -->
 <div class="json-manager">
   <div class="manager-header">
-    <h3>📁 Gestion des données JSON</h3>
-    <button (click)="onClose()" class="btn-close">✕</button>
+    <h3><i class="fas fa-folder-open"></i> Gestion des données JSON</h3>
+    <button (click)="onClose()" class="btn-close"><i class="fas fa-times"></i></button>
   </div>
 
   <div class="manager-content">
     <!-- Statistiques -->
     <div class="stats-section">
-      <h4>📊 Statistiques</h4>
+      <h4><i class="fas fa-chart-bar"></i> Statistiques</h4>
       <div class="stats-grid">
         <div class="stat-item">
-          <div class="stat-icon">🏠</div>
+          <div class="stat-icon"><i class="fas fa-home"></i></div>
           <div class="stat-info">
             <div class="stat-value">{{ getStats().totalFamilies }}</div>
             <div class="stat-label">Familles</div>
           </div>
         </div>
         <div class="stat-item">
-          <div class="stat-icon">👥</div>
+          <div class="stat-icon"><i class="fas fa-users"></i></div>
           <div class="stat-info">
             <div class="stat-value">{{ getStats().totalPersons }}</div>
             <div class="stat-label">Personnes</div>
           </div>
         </div>
         <div class="stat-item">
-          <div class="stat-icon">💾</div>
+          <div class="stat-icon"><i class="fas fa-database"></i></div>
           <div class="stat-info">
             <div class="stat-value">{{ getStats().storageUsed }}</div>
             <div class="stat-label">Stockage</div>
@@ -36,7 +36,7 @@
 
     <!-- Export -->
     <div class="section">
-      <h4>📤 Exporter les données</h4>
+      <h4><i class="fas fa-file-export"></i> Exporter les données</h4>
       <p>Exportez toutes vos données dans un fichier JSON.</p>
       <button
         (click)="exportToFile()"
@@ -44,13 +44,13 @@
         class="btn btn-export"
       >
         <span *ngIf="isExporting" class="spinner"></span>
-        {{ isExporting ? 'Export en cours...' : '📥 Exporter en JSON' }}
+        <i class="fas fa-download"></i> {{ isExporting ? 'Export en cours...' : ' Exporter en JSON' }}
       </button>
     </div>
 
     <!-- Import -->
     <div class="section">
-      <h4>📥 Importer des données</h4>
+      <h4><i class="fas fa-file-import"></i> Importer des données</h4>
       <p>Importez des données depuis un fichier JSON.</p>
       <div class="import-box">
         <input
@@ -67,7 +67,7 @@
           class="btn btn-import"
         >
           <span *ngIf="isImporting" class="spinner"></span>
-          {{ isImporting ? 'Import en cours...' : '📁 Choisir un fichier' }}
+          <i class="fas fa-folder"></i> {{ isImporting ? 'Import en cours...' : ' Choisir un fichier' }}
         </button>
       </div>
       <small class="hint">Format accepté: JSON</small>
@@ -75,18 +75,18 @@
 
     <!-- Sauvegardes -->
     <div class="section">
-      <h4>💾 Sauvegardes automatiques</h4>
+      <h4><i class="fas fa-save"></i> Sauvegardes automatiques</h4>
       <p>Créez et gérez des sauvegardes de vos données.</p>
 
       <button (click)="createBackup()" class="btn btn-backup">
-        ⚡ Créer une sauvegarde
+        <i class="fas fa-bolt"></i> Créer une sauvegarde
       </button>
 
       <button
         (click)="showBackupList = !showBackupList"
         class="btn btn-toggle"
       >
-        {{ showBackupList ? 'Masquer' : 'Afficher' }} les sauvegardes
+        <i class="fas" [class.fa-eye-slash]="showBackupList" [class.fa-eye]="!showBackupList"></i> {{ showBackupList ? 'Masquer' : 'Afficher' }} les sauvegardes
       </button>
 
       <div *ngIf="showBackupList && getBackups().length > 0" class="backup-list">
@@ -103,14 +103,14 @@
               class="btn-action btn-restore"
               title="Restaurer"
             >
-              ↩️
+              <i class="fas fa-undo"></i>
             </button>
             <button
               (click)="deleteBackup(backup)"
               class="btn-action btn-delete"
               title="Supprimer"
             >
-              🗑️
+              <i class="fas fa-trash"></i>
             </button>
           </div>
         </div>
@@ -123,13 +123,13 @@
 
     <!-- Info -->
     <div class="info-section">
-      <h4>ℹ️ Informations</h4>
+      <h4><i class="fas fa-info-circle"></i> Informations</h4>
       <div class="info-content">
         <p><strong>Dernière sauvegarde:</strong>
           {{ getStats().lastBackup ? (getStats().lastBackup | date:'dd/MM/yyyy HH:mm') : 'Aucune' }}
         </p>
-        <p class="tip">💡 Les données sont automatiquement sauvegardées dans votre navigateur.</p>
-        <p class="tip">💡 Exportez régulièrement vos données pour une sécurité supplémentaire.</p>
+        <p class="tip"><i class="fas fa-lightbulb"></i> Les données sont automatiquement sauvegardées dans votre navigateur.</p>
+        <p class="tip"><i class="fas fa-lightbulb"></i> Exportez régulièrement vos données pour une sécurité supplémentaire.</p>
       </div>
     </div>
   </div>

@@ -22,6 +22,8 @@ import {GuideService} from "./services/GuideService";
 import {GuideComponent} from "./components/guide/guide.component";
 import { ToastService } from './services/toast.service';
 import { ConfirmationModalComponent } from './components/confirmation-modal/confirmation-modal.component';
+import { HeaderComponent } from './components/header/header.component';
+import { SidebarComponent } from './components/sidebar/sidebar.component';
 
 
 interface QuickOption {
@@ -46,7 +48,9 @@ interface QuickOption {
     ReactiveFormsModule,
     JsonManagerComponent,
     GuideComponent,
-    ConfirmationModalComponent
+    ConfirmationModalComponent,
+    HeaderComponent,
+    SidebarComponent
   ],
   styleUrls: ['./app.component.css']
 })
@@ -90,28 +94,28 @@ export class AppComponent implements OnInit, AfterViewInit {
 // Mettre à jour la méthode showGuide()
   showGuide(): void {
     this.guideComponent.show();
-    this.toastService.info('Guide ouvert', '📖');
+    this.toastService.info('Guide ouvert', 'fas fa-book-open');
   }
 
   // Options de démarrage rapide
   quickOptions: QuickOption[] = [
     {
       id: 'simple',
-      icon: '🌱',
+      icon: 'fas fa-seedling',
       title: 'Arbre simple',
       description: 'Démarrez avec une structure basique',
       action: () => this.startWithTemplate('simple')
     },
     {
       id: 'gedcom',
-      icon: '📤',
+      icon: 'fas fa-upload',
       title: 'Importer GEDCOM',
       description: 'Importez un arbre existant',
       action: () => this.importFromGedcom()
     },
     {
       id: 'tutorial',
-      icon: '🎓',
+      icon: 'fas fa-graduation-cap',
       title: 'Guide pas à pas',
       description: 'Apprenez à créer votre arbre',
       action: () => this.openTutorial()
@@ -660,18 +664,18 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   getGenerationIcon(level: number): string {
     const icons = [
-      '👑',    // Génération 0: Fondateurs
-      '👨‍👩‍👧‍👦', // Génération 1: Parents
-      '👪',    // Génération 2: Famille élargie
-      '🌱',    // Génération 3: Jeunes générations
-      '🍃',    // Génération 4
-      '🌿',    // Génération 5
-      '🌳',    // Génération 6
-      '🌲',    // Génération 7
-      '🎋',    // Génération 8
-      '🎄'     // Génération 9+
+      'fas fa-crown',           // Génération 0: Fondateurs
+      'fas fa-users',            // Génération 1: Parents
+      'fas fa-people-group',     // Génération 2: Famille élargie
+      'fas fa-seedling',         // Génération 3: Jeunes générations
+      'fas fa-leaf',             // Génération 4
+      'fas fa-spa',              // Génération 5
+      'fas fa-tree',             // Génération 6
+      'fas fa-mountain-sun',     // Génération 7
+      'fas fa-sun',              // Génération 8
+      'fas fa-star'              // Génération 9+
     ];
-    return icons[level] || '⭐';
+    return icons[level] || 'fas fa-star';
   }
 
   getGenerationTitle(level: number): string {

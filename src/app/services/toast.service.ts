@@ -18,10 +18,10 @@ export class ToastService {
   private toastId = 0;
 
   private toastIcons = {
-    success: '✅',
-    error: '❌',
-    info: 'ℹ️',
-    warning: '⚠️'
+    success: 'fas fa-check-circle',
+    error: 'fas fa-exclamation-circle',
+    info: 'fas fa-info-circle',
+    warning: 'fas fa-exclamation-triangle'
   };
 
   show(message: string, type: Toast['type'] = 'info', icon?: string, duration: number = 3000): void {

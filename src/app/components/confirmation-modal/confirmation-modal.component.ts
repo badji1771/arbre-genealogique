@@ -46,13 +46,13 @@ export class ConfirmationModalComponent implements OnInit, OnDestroy {
     }
   }
 
-  getIcon(): string {
+  getIconClass(): string {
     switch (this.options?.type) {
-      case 'success': return '✅';
-      case 'error': return '❌';
-      case 'warning': return '⚠️';
+      case 'success': return 'fas fa-check-circle';
+      case 'error': return 'fas fa-exclamation-circle';
+      case 'warning': return 'fas fa-exclamation-triangle';
       case 'info':
-      default: return 'ℹ️';
+      default: return 'fas fa-info-circle';
     }
   }
 }

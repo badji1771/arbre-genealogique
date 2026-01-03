@@ -1,7 +1,7 @@
 <div class="modal-overlay" *ngIf="show">
   <div class="modal-container" [class]="options?.type || 'info'">
     <div class="modal-header">
-      <div class="header-icon">{{ getIcon() }}</div>
+      <div class="header-icon"><i [class]="getIconClass()"></i></div>
       <h3>{{ options?.title }}</h3>
     </div>
     <div class="modal-body">
