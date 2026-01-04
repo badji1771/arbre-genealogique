@@ -57,6 +57,13 @@
   <!-- Boutons d'action -->
   <div class="action-buttons">
     <button
+      (click)="onShowDescendants($event)"
+      class="btn-action btn-tree"
+      title="Afficher la descendance"
+    >
+      <i class="fas fa-tree"></i>
+    </button>
+    <button
       (click)="onAddChild($event)"
       class="btn-action btn-add"
       title="Ajouter un enfant"

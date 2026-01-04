@@ -87,6 +87,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   // Gestion des générations
   collapsedLevels: Set<number> = new Set<number>();
   maxLevel = 0;
+  rootPersonForView: Person | null = null;
 
 // Ajouter dans la classe
   @ViewChild('guideComponent') guideComponent!: GuideComponent;
@@ -97,30 +98,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.toastService.info('Guide ouvert', 'fas fa-book-open');
   }
 
-  // Options de démarrage rapide
-  quickOptions: QuickOption[] = [
-    {
-      id: 'simple',
-      icon: 'fas fa-seedling',
-      title: 'Arbre simple',
-      description: 'Démarrez avec une structure basique',
-      action: () => this.startWithTemplate('simple')
-    },
-    {
-      id: 'gedcom',
-      icon: 'fas fa-upload',
-      title: 'Importer GEDCOM',
-      description: 'Importez un arbre existant',
-      action: () => this.importFromGedcom()
-    },
-    {
-      id: 'tutorial',
-      icon: 'fas fa-graduation-cap',
-      title: 'Guide pas à pas',
-      description: 'Apprenez à créer votre arbre',
-      action: () => this.openTutorial()
-    }
-  ];
+
 
   personFormData = {
     nom: '',
@@ -254,26 +232,6 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
   }
 
-  // Gestion du survol (optionnel - si vous voulez garder l'ouverture au survol)
-  onMouseEnterActions(): void {
-    if (this.isHoverEnabled && !this.isActionsMenuOpen) {
-      setTimeout(() => {
-        if (!this.isActionsMenuOpen) {
-          this.openActionsMenu();
-        }
-      }, 300);
-    }
-  }
-
-  onMouseLeaveActions(): void {
-    if (this.isHoverEnabled && this.isActionsMenuOpen) {
-      setTimeout(() => {
-        if (this.isActionsMenuOpen) {
-          this.closeActionsMenu();
-        }
-      }, 300);
-    }
-  }
 
   // ===== MÉTHODES POUR LES ACTIONS DU MENU =====
   exportCurrentFamily(): void {
@@ -315,37 +273,6 @@ export class AppComponent implements OnInit, AfterViewInit {
 
 
 
-  shareFamilyAction(): void {
-    if (this.selectedFamily) {
-      const shareData = {
-        title: `Arbre Généalogique - ${this.selectedFamily.name}`,
-        text: `Découvrez l'arbre généalogique de ${this.selectedFamily.name}`,
-        url: window.location.href
-      };
-
-      if (navigator.share) {
-        navigator.share(shareData)
-          .then(() => {
-            this.toastService.show('Partage réussi', 'success', '✅');
-            this.closeActionsMenu();
-          })
-          .catch(() => {
-            this.toastService.show('Partage annulé', 'info', 'ℹ️');
-          });
-      } else {
-        navigator.clipboard.writeText(window.location.href)
-          .then(() => {
-            this.toastService.show('Lien copié dans le presse-papier', 'success', '📋');
-            this.closeActionsMenu();
-          })
-          .catch(() => {
-            this.toastService.show('Impossible de copier le lien', 'error', '❌');
-          });
-      }
-    } else {
-      this.toastService.show('Veuillez sélectionner une famille d\'abord', 'warning', '⚠️');
-    }
-  }
 
   createBackup(): void {
     const backupData = JSON.stringify(this.families, null, 2);
@@ -360,11 +287,6 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.closeActionsMenu();
   }
 
-  openJsonManagerAction(): void {
-    this.showJsonManager = true;
-    this.toastService.show('Gestion JSON ouverte', 'info', '📁');
-    this.closeActionsMenu();
-  }
 
   importFromGedcomAction(): void {
     this.toastService.show('Import GEDCOM - Fonctionnalité à venir', 'info', '📤');
@@ -420,9 +342,6 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
 
-  manageFamily(): void {
-    this.toastService.show('Gestion de famille - Fonctionnalité à venir', 'info', '⚙️');
-  }
 
   // === MÉTHODES POUR LA SIDEBAR ===
   createFirstFamily(): void {
@@ -529,13 +448,6 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.toastService.show('Toutes les générations réduites', 'success', '➡️');
   }
 
-  toggleViewMode(): void {
-    this.toggleShowAllGenerations();
-    const message = this.showAllGenerations ?
-      'Affichage de toutes les générations' :
-      'Affichage sélectif des générations';
-    this.toastService.show(message, 'info', '🔄');
-  }
 
   duplicateFamily(): void {
     if (this.selectedFamily) {
@@ -547,23 +459,9 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
   }
 
-  editFamily(): void {
-    if (this.selectedFamily) {
-      const newName = prompt('Nouveau nom de la famille :', this.selectedFamily.name);
-      if (newName && newName.trim() && newName !== this.selectedFamily.name) {
-        this.jsonDb.updateFamilyName(this.selectedFamily.id, newName.trim());
-        this.toastService.show('Nom de famille modifié', 'success', '✏️');
-      }
-    }
-  }
 
-  deleteFamily(): void {
-    if (this.selectedFamily && confirm(`Supprimer définitivement "${this.selectedFamily.name}" ?`)) {
-      this.jsonDb.deleteFamily(this.selectedFamily.id);
-      this.selectedFamily = null;
-      this.toastService.show('Famille supprimée', 'warning', '🗑️');
-    }
-  }
+
+
 
   // === MÉTHODES POUR LA NAVIGATION RAPIDE ===
   toggleSidebar(): void {
@@ -639,7 +537,8 @@ export class AppComponent implements OnInit, AfterViewInit {
       this.maxLevel = 0;
       return;
     }
-    this.maxLevel = this.getMaxDepth(this.selectedFamily.members);
+    const startMembers = this.rootPersonForView ? [this.rootPersonForView] : this.selectedFamily.members;
+    this.maxLevel = this.getMaxDepth(startMembers);
   }
 
   private getMaxDepth(persons: Person[]): number {
@@ -763,7 +662,8 @@ export class AppComponent implements OnInit, AfterViewInit {
         });
       }
     };
-    countByLevel(this.selectedFamily.members, 0);
+    const startMembers = this.rootPersonForView ? [this.rootPersonForView] : this.selectedFamily.members;
+    countByLevel(startMembers, 0);
     return count;
   }
 
@@ -790,7 +690,8 @@ export class AppComponent implements OnInit, AfterViewInit {
         });
       }
     };
-    collectByLevel(this.selectedFamily.members, 0);
+    const startMembers = this.rootPersonForView ? [this.rootPersonForView] : this.selectedFamily.members;
+    collectByLevel(startMembers, 0);
     return result;
   }
 
@@ -802,7 +703,21 @@ export class AppComponent implements OnInit, AfterViewInit {
   // === MÉTHODES DE GESTION DES FAMILLES ===
   selectFamily(family: Family): void {
     this.jsonDb.selectFamily(family);
+    this.rootPersonForView = null; // Réinitialiser la racine de la vue
     this.toastService.show(`Famille "${family.name}" sélectionnée`, 'success', '🏠');
+  }
+
+  showDescendants(person: Person): void {
+    this.rootPersonForView = person;
+    this.calculateMaxLevel();
+    this.toastService.show(`Descendance de ${person.prenom} affichée`, 'info', '🌳');
+    this.scrollToTop();
+  }
+
+  resetView(): void {
+    this.rootPersonForView = null;
+    this.calculateMaxLevel();
+    this.toastService.show('Vue de l\'arbre complet restaurée', 'info', '🌳');
   }
 
   openJsonManager(): void {
@@ -956,13 +871,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
   }
 
-  // === MÉTHODES D'EXPORT/IMPORT ===
-  exportAllFamilies(): void {
-    if (this.families.length > 0) {
-      this.excelExportService.exportMultipleFamilies(this.families);
-      this.toastService.show('Toutes les familles exportées', 'success', '📂');
-    }
-  }
+
 
   importFromJson(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -1018,15 +927,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     };
   }
 
-  // Écouteur pour la touche Échap
-  onEscapeKeyOld(): void {
-    if (this.showPersonModal) {
-      this.closePersonModal();
-    }
-    if (this.selectedPerson) {
-      this.selectedPerson = null;
-    }
-  }
+
 
   getAllMembersFlat(): Person[] {
     if (!this.selectedFamily) return [];
@@ -1130,20 +1031,6 @@ export class AppComponent implements OnInit, AfterViewInit {
     }, 100);
   }
 
-  // Dans app.component.ts, ajoutez cette méthode pour les actions rapides sur une personne
-  showPersonActions(person: Person, event: MouseEvent): void {
-    event.stopPropagation();
-
-    // Créer un menu contextuel ou utiliser un toast
-    this.toastService.show(
-      `${person.prenom} ${person.nom} - Sélectionnez une action`,
-      'info',
-      '⚙️'
-    );
-
-    // Vous pourriez aussi ouvrir un menu contextuel personnalisé
-    this.openPersonContextMenu(person, event);
-  }
 
   // Optionnel : Menu contextuel avancé
   openPersonContextMenu(person: Person, event: MouseEvent): void {
@@ -1160,6 +1047,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     menu.style.zIndex = '9999';
 
     const actions = [
+      { icon: '🌳', label: 'Afficher la descendance', action: () => this.showDescendants(person) },
       { icon: '👁️', label: 'Voir détails', action: () => this.onViewDetails(person) },
       { icon: '✏️', label: 'Modifier', action: () => this.openEditPersonModal(person) },
       { icon: '👶', label: 'Ajouter enfant', action: () => this.openAddPersonModal(person) },

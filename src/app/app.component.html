@@ -7,6 +7,7 @@
     (triggerImport)="triggerImport()"
     (showGuide)="showGuide()"
     (openJsonManager)="openJsonManager()"
+    (goHome)="selectedFamily = null"
   ></app-header>
 
   <!-- Contenu principal redessiné -->
@@ -143,6 +144,16 @@
 
             <!-- Dans la section header-actions du family-header -->
             <div class="header-actions">
+              <!-- Indicateur de vue filtrée -->
+              <div class="view-indicator" *ngIf="rootPersonForView">
+                <div class="indicator-badge">
+                  <i class="fas fa-filter"></i> Vue : Descendance de {{ rootPersonForView.prenom }}
+                </div>
+                <button (click)="resetView()" class="btn-reset-view" title="Revenir à l'arbre complet">
+                  <i class="fas fa-times"></i> Voir tout l'arbre
+                </button>
+              </div>
+
               <!-- Bouton Ajouter un membre amélioré -->
               <div class="add-member-container">
                 <button
@@ -446,6 +457,7 @@
                               (edit)="openEditPersonModal($event)"
                               (delete)="deletePerson($event)"
                               (viewDetails)="onViewDetails($event)"
+                              (showDescendants)="showDescendants($event)"
                             ></app-person-card>
 
                             <!-- Indicateur enfants -->

@@ -30,6 +30,7 @@ export class PersonCardComponent {
   @Output() edit = new EventEmitter<Person>();
   @Output() delete = new EventEmitter<number>();
   @Output() viewDetails = new EventEmitter<Person>();
+  @Output() showDescendants = new EventEmitter<Person>();
 
   getCardClass(): string {
     const classes = ['person-card'];
@@ -118,6 +119,11 @@ export class PersonCardComponent {
   onViewDetails(event: Event): void {
     event.stopPropagation();
     this.viewDetails.emit(this.person);
+  }
+
+  onShowDescendants(event: Event): void {
+    event.stopPropagation();
+    this.showDescendants.emit(this.person);
   }
 
   onPhotoError(event: Event): void {

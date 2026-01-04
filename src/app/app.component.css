@@ -81,6 +81,61 @@
   opacity: 1 !important;
 }
 
+/* Indicateur de vue filtrée */
+.view-indicator {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--primary-ultralight);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--primary-light);
+  animation: slideInDown 0.3s ease-out;
+}
+
+.indicator-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--primary-dark);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.btn-reset-view {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--white);
+  color: var(--danger);
+  border: 1px solid var(--danger-light);
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-reset-view:hover {
+  background: var(--danger);
+  color: var(--white);
+  border-color: var(--danger);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+@keyframes slideInDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 /* Reset et base */
 * {
   box-sizing: border-box;

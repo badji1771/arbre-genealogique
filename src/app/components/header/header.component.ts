@@ -19,8 +19,13 @@ export class HeaderComponent {
   @Output() triggerImport = new EventEmitter<void>();
   @Output() showGuide = new EventEmitter<void>();
   @Output() openJsonManager = new EventEmitter<void>();
+  @Output() goHome = new EventEmitter<void>();
 
   guideService = inject(GuideService);
+
+  onGoHome(): void {
+    this.goHome.emit();
+  }
 
   onToggleSidebar(): void {
     this.toggleSidebar.emit();
