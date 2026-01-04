@@ -24,6 +24,7 @@ import { ToastService } from './services/toast.service';
 import { ConfirmationModalComponent } from './components/confirmation-modal/confirmation-modal.component';
 import { HeaderComponent } from './components/header/header.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
+import { DateUtils } from './utils/date-utils';
 
 
 interface QuickOption {
@@ -127,7 +128,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     const isFirstVisit = !localStorage.getItem('hasVisitedBefore');
     if (isFirstVisit) {
       setTimeout(() => {
-        this.toastService.show('Bienvenue dans Arbre Généalogique !', 'info', '🎉');
+        this.toastService.show('Bienvenue dans Arbre Généalogique !', 'info', 'fas fa-hand-holding-heart');
         localStorage.setItem('hasVisitedBefore', 'true');
       }, 1000);
     }
@@ -237,10 +238,10 @@ export class AppComponent implements OnInit, AfterViewInit {
   exportCurrentFamily(): void {
     if (this.selectedFamily) {
       this.excelExportService.exportFamilyToExcel(this.selectedFamily);
-      this.toastService.show(`"${this.selectedFamily.name}" exportée en Excel`, 'success', '📊');
+      this.toastService.show(`"${this.selectedFamily.name}" exportée en Excel`, 'success', 'fas fa-file-excel');
       this.closeActionsMenu();
     } else {
-      this.toastService.show('Veuillez sélectionner une famille d\'abord', 'warning', '⚠️');
+      this.toastService.show('Veuillez sélectionner une famille d\'abord', 'warning', 'fas fa-exclamation-triangle');
     }
   }
 
@@ -254,25 +255,22 @@ export class AppComponent implements OnInit, AfterViewInit {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      this.toastService.show(`"${this.selectedFamily.name}" exportée en JSON`, 'success', '💾');
+      this.toastService.show(`"${this.selectedFamily.name}" exportée en JSON`, 'success', 'fas fa-file-code');
       this.closeActionsMenu();
     } else {
-      this.toastService.show('Veuillez sélectionner une famille d\'abord', 'warning', '⚠️');
+      this.toastService.show('Veuillez sélectionner une famille d\'abord', 'warning', 'fas fa-exclamation-triangle');
     }
   }
 
   exportStatistics(): void {
     if (this.families.length > 0) {
       this.excelExportService.exportStatistics(this.families);
-      this.toastService.show('Statistiques exportées', 'success', '📈');
+      this.toastService.show('Statistiques exportées', 'success', 'fas fa-chart-line');
       this.closeActionsMenu();
     } else {
-      this.toastService.show('Aucune donnée à exporter', 'info', 'ℹ️');
+      this.toastService.show('Aucune donnée à exporter', 'info', 'fas fa-circle-info');
     }
   }
-
-
-
 
   createBackup(): void {
     const backupData = JSON.stringify(this.families, null, 2);
@@ -283,13 +281,13 @@ export class AppComponent implements OnInit, AfterViewInit {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    this.toastService.show('Sauvegarde créée avec succès', 'success', '💾');
+    this.toastService.show('Sauvegarde créée avec succès', 'success', 'fas fa-cloud-arrow-up');
     this.closeActionsMenu();
   }
 
 
   importFromGedcomAction(): void {
-    this.toastService.show('Import GEDCOM - Fonctionnalité à venir', 'info', '📤');
+    this.toastService.show('Import GEDCOM - Fonctionnalité à venir', 'info', 'fas fa-upload');
     this.closeActionsMenu();
   }
 
@@ -298,7 +296,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       this.jsonDb.clearAllData();
       this.selectedFamily = null;
       this.selectedPerson = null;
-      this.toastService.show('Toutes les données ont été effacées', 'warning', '🗑️');
+      this.toastService.show('Toutes les données ont été effacées', 'warning', 'fas fa-trash-can');
       this.closeActionsMenu();
     }
   }
@@ -354,7 +352,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   quickView(family: Family): void {
     this.selectFamily(family);
-    this.toastService.show(`Vue rapide de ${family.name}`, 'info', '👁️');
+    this.toastService.show(`Vue rapide de ${family.name}`, 'info', 'fas fa-eye');
   }
 
   addNewFamily(): void {
@@ -363,7 +361,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       this.jsonDb.selectFamily(family);
       this.newFamilyName = '';
       this.showAddFamily = false;
-      this.toastService.show('Nouvelle famille créée', 'success', '✅');
+      this.toastService.show('Nouvelle famille créée', 'success', 'fas fa-check');
     }
   }
 
@@ -371,7 +369,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   openSample(): void {
     const sampleFamily = this.jsonDb.createSampleFamily();
     this.selectFamily(sampleFamily);
-    this.toastService.show('Exemple chargé avec succès', 'success', '✅');
+    this.toastService.show('Exemple chargé avec succès', 'success', 'fas fa-check');
   }
 
   startWithTemplate(template: string): void {
@@ -387,11 +385,11 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     const family = this.jsonDb.addFamily(familyName);
     this.jsonDb.selectFamily(family);
-    this.toastService.show(`${familyName} créé avec succès`, 'success', '✅');
+    this.toastService.show(`${familyName} créé avec succès`, 'success', 'fas fa-check');
   }
 
   importFromGedcom(): void {
-    this.toastService.show('Import GEDCOM - Fonctionnalité à venir', 'info', '📤');
+    this.toastService.show('Import GEDCOM - Fonctionnalité à venir', 'info', 'fas fa-upload');
   }
 
   openTutorial(): void {
@@ -403,7 +401,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       } else if (this.guideComponent) {
         this.guideComponent.show();
       }
-      this.toastService.show('Ouverture du guide', 'info', '📖');
+      this.toastService.show('Ouverture du guide', 'info', 'fas fa-graduation-cap');
     } catch (e) {
       // En cas d'erreur, afficher au moins l'aperçu du guide
       if (this.guideComponent) {
@@ -430,22 +428,22 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   private getViewIcon(view: string): string {
     const icons: {[key: string]: string} = {
-      'tree': '🌳',
-      'list': '📋',
-      'timeline': '📅',
-      'map': '🗺️'
+      'tree': 'fas fa-sitemap',
+      'list': 'fas fa-list',
+      'timeline': 'fas fa-calendar-alt',
+      'map': 'fas fa-map-marked-alt'
     };
-    return icons[view] || '👁️';
+    return icons[view] || 'fas fa-eye';
   }
 
   expandAll(): void {
     this.expandAllGenerations();
-    this.toastService.show('Toutes les générations développées', 'success', '⬇️');
+    this.toastService.show('Toutes les générations développées', 'success', 'fas fa-expand-arrows-alt');
   }
 
   collapseAll(): void {
     this.collapseAllGenerations();
-    this.toastService.show('Toutes les générations réduites', 'success', '➡️');
+    this.toastService.show('Toutes les générations réduites', 'success', 'fas fa-compress-arrows-alt');
   }
 
 
@@ -454,8 +452,25 @@ export class AppComponent implements OnInit, AfterViewInit {
       const duplicated = this.jsonDb.duplicateFamily(this.selectedFamily.id);
       if (duplicated) {
         this.selectFamily(duplicated);
-        this.toastService.show('Famille dupliquée avec succès', 'success', '⎘');
+        this.toastService.show('Famille dupliquée avec succès', 'success', 'fas fa-copy');
       }
+    }
+  }
+
+  onRenameFamily(event: {id: number, newName: string}): void {
+    const success = this.jsonDb.updateFamilyName(event.id, event.newName);
+    if (success) {
+      this.toastService.show('Famille renommée', 'success', 'fas fa-edit');
+    }
+  }
+
+  onDeleteFamily(id: number): void {
+    const success = this.jsonDb.deleteFamily(id);
+    if (success) {
+      if (this.selectedFamily?.id === id) {
+        this.selectedFamily = null;
+      }
+      this.toastService.show('Famille supprimée', 'warning', 'fas fa-trash-alt');
     }
   }
 
@@ -469,14 +484,14 @@ export class AppComponent implements OnInit, AfterViewInit {
     const message = this.sidebarCollapsed ?
       'Sidebar réduite' :
       'Sidebar étendue';
-    this.toastService.show(message, 'info', '↔️');
+    this.toastService.show(message, 'info', 'fas fa-columns');
   }
 
   addQuickPerson(): void {
     if (this.selectedFamily) {
       this.openAddPersonModal();
     } else {
-      this.toastService.show('Veuillez d\'abord sélectionner une famille', 'warning', '🏠');
+      this.toastService.show('Veuillez d\'abord sélectionner une famille', 'warning', 'fas fa-house-chimney');
     }
   }
 
@@ -486,13 +501,13 @@ export class AppComponent implements OnInit, AfterViewInit {
       if (searchTerm && searchTerm.trim()) {
         const results = this.jsonDb.searchPerson(searchTerm.trim());
         if (results.length > 0) {
-          this.toastService.show(`${results.length} résultat(s) trouvé(s)`, 'success', '🔍');
+          this.toastService.show(`${results.length} résultat(s) trouvé(s)`, 'success', 'fas fa-search');
         } else {
-          this.toastService.show('Aucun résultat trouvé', 'info', '🔍');
+          this.toastService.show('Aucun résultat trouvé', 'info', 'fas fa-search');
         }
       }
     } else {
-      this.toastService.show('Veuillez d\'abord sélectionner une famille', 'warning', '🏠');
+      this.toastService.show('Veuillez d\'abord sélectionner une famille', 'warning', 'fas fa-house-chimney');
     }
   }
 
@@ -704,25 +719,25 @@ export class AppComponent implements OnInit, AfterViewInit {
   selectFamily(family: Family): void {
     this.jsonDb.selectFamily(family);
     this.rootPersonForView = null; // Réinitialiser la racine de la vue
-    this.toastService.show(`Famille "${family.name}" sélectionnée`, 'success', '🏠');
+    this.toastService.show(`Famille "${family.name}" sélectionnée`, 'success', 'fas fa-house-chimney');
   }
 
   showDescendants(person: Person): void {
     this.rootPersonForView = person;
     this.calculateMaxLevel();
-    this.toastService.show(`Descendance de ${person.prenom} affichée`, 'info', '🌳');
+    this.toastService.show(`Descendance de ${person.prenom} affichée`, 'info', 'fas fa-sitemap');
     this.scrollToTop();
   }
 
   resetView(): void {
     this.rootPersonForView = null;
     this.calculateMaxLevel();
-    this.toastService.show('Vue de l\'arbre complet restaurée', 'info', '🌳');
+    this.toastService.show('Vue de l\'arbre complet restaurée', 'info', 'fas fa-tree');
   }
 
   openJsonManager(): void {
     this.showJsonManager = true;
-    this.toastService.show('Gestion JSON ouverte', 'info', '📁');
+    this.toastService.show('Gestion JSON ouverte', 'info', 'fas fa-file-code');
   }
 
   closeJsonManager(): void {
@@ -1047,20 +1062,20 @@ export class AppComponent implements OnInit, AfterViewInit {
     menu.style.zIndex = '9999';
 
     const actions = [
-      { icon: '🌳', label: 'Afficher la descendance', action: () => this.showDescendants(person) },
-      { icon: '👁️', label: 'Voir détails', action: () => this.onViewDetails(person) },
-      { icon: '✏️', label: 'Modifier', action: () => this.openEditPersonModal(person) },
-      { icon: '👶', label: 'Ajouter enfant', action: () => this.openAddPersonModal(person) },
-      { icon: '📷', label: 'Voir photo', action: () => this.openPhotoGallery(person) },
-      { icon: '⬇️', label: 'Télécharger photo', action: () => this.downloadPersonPhoto(person) },
-      { icon: '🗑️', label: 'Supprimer', action: () => this.deletePerson(person.id) },
+      { icon: 'fas fa-sitemap', label: 'Afficher la descendance', action: () => this.showDescendants(person) },
+      { icon: 'fas fa-eye', label: 'Voir détails', action: () => this.onViewDetails(person) },
+      { icon: 'fas fa-pencil-alt', label: 'Modifier', action: () => this.openEditPersonModal(person) },
+      { icon: 'fas fa-baby', label: 'Ajouter enfant', action: () => this.openAddPersonModal(person) },
+      { icon: 'fas fa-image', label: 'Voir photo', action: () => this.openPhotoGallery(person) },
+      { icon: 'fas fa-download', label: 'Télécharger photo', action: () => this.downloadPersonPhoto(person) },
+      { icon: 'fas fa-trash-alt', label: 'Supprimer', action: () => this.deletePerson(person.id) },
     ];
 
     actions.forEach(action => {
       const button = document.createElement('button');
       button.className = 'context-menu-item';
       button.innerHTML = `
-      <span class="context-menu-icon">${action.icon}</span>
+      <span class="context-menu-icon"><i class="${action.icon}"></i></span>
       <span class="context-menu-label">${action.label}</span>
     `;
       button.style.display = 'flex';
@@ -1109,18 +1124,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   // Méthodes utilitaires pour la sidebar
   getAgeFromDate(date?: Date): number | null {
-    if (!date) return null;
-
-    const birthDate = new Date(date);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-
-    return age;
+    return date ? DateUtils.calculateAge(date) : null;
   }
 
   copyToClipboard(text: string): void {

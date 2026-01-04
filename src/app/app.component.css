@@ -5420,3 +5420,17 @@ body > .actions-dropdown-portal {
   .level-header { padding: 0.5rem; }
   .level-content { padding: 0.5rem 0.5rem 1rem; }
 }
+
+.sidebar-collapsed .modern-sidebar {
+  width: 0 !important;
+  opacity: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  pointer-events: none !important;
+  border-right: none !important;
+}
+
+.sidebar-collapsed .main-content {
+  margin-left: 0 !important;
+  width: 100% !important;
+}

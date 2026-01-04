@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, Pipe, PipeTransform } from '@angular/core';
 import { Person } from '../../models/person.model';
 import { CommonModule } from "@angular/common";
+import { DateUtils } from '../../utils/date-utils';
 
 @Pipe({
   name: 'truncate',
@@ -81,18 +82,7 @@ export class PersonCardComponent {
   }
 
   getAge(): number {
-    if (!this.person.dateNaissance) return 0;
-
-    const birthDate = new Date(this.person.dateNaissance);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-
-    return age;
+    return DateUtils.calculateAge(this.person.dateNaissance);
   }
 
   onSelect(): void {

@@ -887,8 +887,8 @@ export class JsonDatabaseService {
     return family;
   }
 
-  updateFamilyName(id: number, s: string) {
-    this.updateFamily(id, { name: s });
+  updateFamilyName(id: number, s: string): boolean {
+    return this.updateFamily(id, { name: s });
   }
 
   duplicateFamily(id: number) {

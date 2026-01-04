@@ -22,28 +22,28 @@ export class GuideService {
     {
       id: 'getting-started',
       title: 'Démarrage rapide',
-      description: 'Les bases pour commencer votre arbre généalogique',
+      description: 'Les bases pour commencer votre arbre généalogique en quelques clics',
       icon: 'fas fa-rocket',
       steps: [
         {
           id: 'welcome',
-          title: 'Bienvenue',
-          description: 'Bienvenue dans l\'application Arbre Généalogique ! Cette guide vous accompagnera dans la découverte des fonctionnalités.',
-          icon: 'fas fa-hand-wave',
+          title: 'Bienvenue sur Arbre Généalogique',
+          description: 'Découvrez une manière moderne de préserver votre héritage familial. Ce guide interactif vous montrera comment tirer le meilleur parti de l\'application.',
+          icon: 'fas fa-hand-holding-heart',
           position: 'center'
         },
         {
           id: 'create-first-family',
-          title: 'Créer votre première famille',
-          description: 'Commencez par créer une famille pour organiser votre arbre généalogique.',
-          icon: 'fas fa-home',
+          title: 'Créez votre première lignée',
+          description: 'Une famille regroupe tous les membres d\'un même arbre. Cliquez sur le bouton "+" dans la barre latérale pour commencer une nouvelle histoire.',
+          icon: 'fas fa-users-rays',
           targetElement: '.btn-add-circle',
-          position: 'bottom'
+          position: 'right'
         },
         {
           id: 'add-first-person',
-          title: 'Ajouter le premier membre',
-          description: 'Ajoutez le fondateur de votre famille en cliquant sur "Ajouter un membre".',
+          title: 'Posez la première pierre',
+          description: 'Chaque arbre commence par un fondateur. Utilisez le bouton "Ajouter un membre" pour créer le point de départ de votre généalogie.',
           icon: 'fas fa-user-plus',
           targetElement: '.btn-add-member',
           position: 'bottom'
@@ -52,30 +52,30 @@ export class GuideService {
     },
     {
       id: 'family-management',
-      title: 'Gestion des familles',
-      description: 'Comment organiser et gérer vos familles',
-      icon: 'fas fa-book-atlas',
+      title: 'Organisation & Partage',
+      description: 'Gérez plusieurs familles et collaborez avec vos proches',
+      icon: 'fas fa-sitemap',
       steps: [
         {
           id: 'switch-families',
-          title: 'Changer de famille',
-          description: 'Cliquez sur une famille dans la barre latérale pour la sélectionner.',
+          title: 'Navigation fluide',
+          description: 'Basculez entre vos différents arbres en un clic depuis la barre latérale gauche. Vous pouvez aussi renommer ou supprimer une famille en la survolant.',
           icon: 'fas fa-exchange-alt',
           targetElement: '.family-card',
           position: 'right'
         },
         {
           id: 'family-actions',
-          title: 'Actions rapides',
-          description: 'Utilisez le menu Actions pour exporter, dupliquer ou partager votre famille.',
-          icon: 'fas fa-bolt',
+          title: 'Actions puissantes',
+          description: 'Le menu "Actions" regroupe les outils d\'export, de duplication et de gestion avancée pour votre arbre actuel.',
+          icon: 'fas fa-wand-magic-sparkles',
           targetElement: '.btn-actions',
           position: 'bottom'
         },
         {
           id: 'import-export',
-          title: 'Import/Export',
-          description: 'Importez des données existantes ou exportez votre arbre au format Excel, JSON.',
+          title: 'Données sans frontières',
+          description: 'Importez des fichiers GEDCOM ou JSON, et exportez vos recherches vers Excel pour les partager facilement.',
           icon: 'fas fa-file-export',
           targetElement: '.btn-import',
           position: 'bottom'
@@ -84,31 +84,31 @@ export class GuideService {
     },
     {
       id: 'person-management',
-      title: 'Gestion des personnes',
-      description: 'Ajouter et modifier les membres de votre famille',
-      icon: 'fas fa-users-cog',
+      title: 'Membres & Descendance',
+      description: 'Donnez vie à vos ancêtres et suivez leur lignée',
+      icon: 'fas fa-user-gear',
       steps: [
         {
           id: 'add-children',
-          title: 'Ajouter des enfants',
-          description: 'Cliquez sur le bouton "Ajouter enfant" sur une carte personne pour ajouter des descendants.',
-          icon: 'fas fa-baby',
-          targetElement: '.member-node',
+          title: 'Étendez la lignée',
+          description: 'Ajoutez des enfants directement depuis la carte d\'un parent pour construire automatiquement les niveaux de l\'arbre.',
+          icon: 'fas fa-baby-carriage',
+          targetElement: '.btn-add',
           position: 'bottom'
         },
         {
           id: 'edit-person',
-          title: 'Modifier une personne',
-          description: 'Cliquez sur l\'icône de modification pour changer les informations d\'une personne.',
-          icon: 'fas fa-pencil-alt',
-          targetElement: '.btn-action',
+          title: 'Précision historique',
+          description: 'Modifiez les détails, ajoutez des photos, des professions ou des notes pour chaque membre.',
+          icon: 'fas fa-user-pen',
+          targetElement: '.btn-edit',
           position: 'left'
         },
         {
           id: 'person-details',
-          title: 'Voir les détails',
-          description: 'Cliquez sur une personne pour afficher ses détails dans la barre latérale.',
-          icon: 'fas fa-clipboard-list',
+          title: 'Fiche détaillée',
+          description: 'Cliquez sur n\'importe quelle carte pour voir toutes les informations et les statistiques d\'un membre dans le panneau de droite.',
+          icon: 'fas fa-address-card',
           targetElement: '.person-card',
           position: 'right'
         }
@@ -116,63 +116,63 @@ export class GuideService {
     },
     {
       id: 'views-navigation',
-      title: 'Vues et navigation',
-      description: 'Explorer votre arbre de différentes manières',
-      icon: '🌳',
+      title: 'Vues & Exploration',
+      description: 'Découvrez votre arbre sous différents angles',
+      icon: 'fas fa-mountain-sun',
       steps: [
         {
           id: 'switch-views',
-          title: 'Changer de vue',
-          description: 'Utilisez les boutons en haut pour basculer entre les vues Arbre, Liste, Chronologie et Carte.',
-          icon: '👁️',
-          targetElement: '.view-picker-btn',
+          title: 'Perspectives multiples',
+          description: 'Visualisez vos données en mode Arbre classique, Liste détaillée ou Chronologie historique.',
+          icon: 'fas fa-layer-group',
+          targetElement: '.view-picker-buttons',
           position: 'bottom'
         },
         {
           id: 'expand-collapse',
-          title: 'Développer/Réduire',
-          description: 'Utilisez les boutons "Ouvrir tout" et "Fermer tout" pour contrôler l\'affichage des générations.',
-          icon: '↕️',
-          targetElement: '.expansion-controls',
+          title: 'Gestion de l\'espace',
+          description: 'Développez ou réduisez toutes les générations simultanément pour naviguer dans les grands arbres.',
+          icon: 'fas fa-up-down-left-right',
+          targetElement: '.expansion-group',
           position: 'bottom'
         },
         {
           id: 'generation-navigation',
-          title: 'Navigation par génération',
-          description: 'Cliquez sur les marqueurs de génération à gauche pour naviguer rapidement.',
-          icon: '⬅️',
-          targetElement: '.generation-marker',
+          title: 'Voyage dans le temps',
+          description: 'Utilisez les marqueurs à gauche pour sauter instantanément d\'une génération à l\'autre.',
+          icon: 'fas fa-list-ol',
+          targetElement: '.generation-sidebar',
           position: 'right'
         }
       ]
     },
     {
       id: 'advanced-features',
-      title: 'Fonctionnalités avancées',
-      description: 'Découvrez les fonctionnalités puissantes de l\'application',
-      icon: '✨',
+      title: 'Outils Experts',
+      description: 'Allez plus loin dans l\'analyse de vos données',
+      icon: 'fas fa-microscope',
       steps: [
         {
           id: 'quick-search',
-          title: 'Recherche rapide',
-          description: 'Utilisez la loupe dans la navigation rapide pour rechercher des personnes.',
-          icon: '🔍',
-          targetElement: '.nav-btn:nth-child(8)',
+          title: 'Retrouvez n\'importe qui',
+          description: 'La recherche rapide vous permet de localiser instantanément un membre parmi des centaines.',
+          icon: 'fas fa-magnifying-glass',
+          targetElement: '.nav-btn:nth-child(7)',
           position: 'left'
         },
         {
           id: 'statistics',
-          title: 'Statistiques',
-          description: 'Consultez les statistiques globales dans la barre latérale pour une vue d\'ensemble.',
-          icon: '📊',
-          targetElement: '.stats-section',
-          position: 'left'
+          title: 'Analyse démographique',
+          description: 'Consultez la répartition par genre, l\'évolution de la famille et d\'autres indicateurs clés.',
+          icon: 'fas fa-chart-pie',
+          targetElement: '.family-stats',
+          position: 'bottom'
         },
         {
           id: 'json-manager',
-          title: 'Gestion JSON avancée',
-          description: 'Utilisez le gestionnaire JSON pour des opérations avancées sur vos données.',
-          icon: '💾',
+          title: 'Contrôle total',
+          description: 'Accédez directement à la base de données JSON pour des modifications de masse ou des sauvegardes manuelles.',
+          icon: 'fas fa-database',
           targetElement: '.btn-action-primary',
           position: 'bottom'
         }
@@ -199,7 +199,7 @@ export class GuideService {
   private saveProgress(progress: UserGuideProgress): void {
     progress.lastVisited = new Date();
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(progress));
-    this.progressSubject.next(progress);
+    this.progressSubject.next({...progress});
   }
 
   private getCurrentStep(): string | null {

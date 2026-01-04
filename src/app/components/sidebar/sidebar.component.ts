@@ -16,19 +16,23 @@ export class SidebarComponent {
   @Input() showAddFamily = false;
   @Input() newFamilyName = '';
   @Input() collapsed = false;
+  @Input() totalMembersAllFamilies = 0;
+  @Input() totalGenerations = 0;
 
   @Output() selectFamily = new EventEmitter<Family>();
   @Output() toggleAddFamily = new EventEmitter<void>();
   @Output() addNewFamily = new EventEmitter<string>();
   @Output() quickView = new EventEmitter<Family>();
   @Output() toggleSidebar = new EventEmitter<void>();
-  @Output() getTotalMembersAllFamilies = new EventEmitter<void>(); // Or just pass as Input
+  @Output() renameFamily = new EventEmitter<{id: number, newName: string}>();
+  @Output() deleteFamily = new EventEmitter<number>();
 
-  // These could be Inputs instead of calling methods from parent
-  @Input() totalMembersAllFamilies = 0;
-  @Input() totalGenerations = 0;
+  editingFamilyId: number | null = null;
+  editedFamilyName: string = '';
+  Math = Math;
 
   onSelectFamily(family: Family): void {
+    if (this.editingFamilyId === family.id) return;
     this.selectFamily.emit(family);
   }
 
@@ -51,8 +55,45 @@ export class SidebarComponent {
     this.toggleSidebar.emit();
   }
 
+  startRename(family: Family, event: Event): void {
+    event.stopPropagation();
+    this.editingFamilyId = family.id;
+    this.editedFamilyName = family.name;
+  }
+
+  cancelRename(event: Event): void {
+    event.stopPropagation();
+    this.editingFamilyId = null;
+    this.editedFamilyName = '';
+  }
+
+  saveRename(family: Family, event: Event): void {
+    event.stopPropagation();
+    if (this.editedFamilyName.trim() && this.editedFamilyName !== family.name) {
+      this.renameFamily.emit({id: family.id, newName: this.editedFamilyName.trim()});
+    }
+    this.editingFamilyId = null;
+  }
+
+  onDeleteFamily(family: Family, event: Event): void {
+    event.stopPropagation();
+    if (confirm(`Êtes-vous sûr de vouloir supprimer la famille "${family.name}" ?`)) {
+      this.deleteFamily.emit(family.id);
+    }
+  }
+
   getFamilyMemberCount(family: Family): number {
     if (!family || !family.members) return 0;
-    return family.members.length;
+    // Compte récursif des membres
+    const countMembers = (persons: any[]): number => {
+      let count = persons.length;
+      persons.forEach(p => {
+        if (p.children && p.children.length > 0) {
+          count += countMembers(p.children);
+        }
+      });
+      return count;
+    };
+    return countMembers(family.members);
   }
 }

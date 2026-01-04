@@ -25,6 +25,8 @@
       (addNewFamily)="newFamilyName = $event; addNewFamily()"
       (quickView)="quickView($event)"
       (toggleSidebar)="toggleSidebar()"
+      (renameFamily)="onRenameFamily($event)"
+      (deleteFamily)="onDeleteFamily($event)"
     ></app-sidebar>
 
     <!-- Zone centrale principale -->
@@ -436,49 +438,49 @@
                       </button>
                     </div>
 
-                    <!-- Contenu de génération -->
-                    <div *ngIf="!isLevelCollapsed(level)" class="level-content">
-                      <div class="members-grid">
-                        <ng-container *ngFor="let node of getNodesByLevel(level)">
-                          <div class="member-node">
-                            <!-- Connexion parent -->
-                            <div *ngIf="level > 0" class="parent-connection">
-                              <div class="connection-line"></div>
-                              <div class="connection-arrow"><i class="fas fa-arrow-down"></i></div>
-                            </div>
+          <!-- Contenu de génération -->
+          <div *ngIf="!isLevelCollapsed(level)" class="level-content">
+            <div class="members-grid">
+              <ng-container *ngFor="let node of getNodesByLevel(level)">
+                <div class="member-node">
+                  <!-- Connexion parent -->
+                  <div *ngIf="level > 0" class="parent-connection">
+                    <div class="connection-line"></div>
+                    <div class="connection-arrow"><i class="fas fa-arrow-down"></i></div>
+                  </div>
 
-                            <!-- Carte personne -->
-                            <app-person-card
-                              [person]="node.person"
-                              [isSelected]="node.isSelected"
-                              [generation]="level"
-                              (select)="selectedPerson = $event"
-                              (addChild)="openAddPersonModal($event)"
-                              (edit)="openEditPersonModal($event)"
-                              (delete)="deletePerson($event)"
-                              (viewDetails)="onViewDetails($event)"
-                              (showDescendants)="showDescendants($event)"
-                            ></app-person-card>
+                  <!-- Carte personne -->
+                  <app-person-card
+                    [person]="node.person"
+                    [isSelected]="node.isSelected"
+                    [generation]="level"
+                    (select)="selectedPerson = $event"
+                    (addChild)="openAddPersonModal($event)"
+                    (edit)="openEditPersonModal($event)"
+                    (delete)="deletePerson($event)"
+                    (viewDetails)="onViewDetails($event)"
+                    (showDescendants)="showDescendants($event)"
+                  ></app-person-card>
 
-                            <!-- Indicateur enfants -->
-                            <div
-                              *ngIf="node.children && node.children.length > 0"
-                              class="children-indicator"
-                              (click)="scrollToGeneration(level + 1)"
-                            >
-                              <span class="indicator-icon">⬇️</span>
-                              <span class="indicator-text">{{ node.children.length }} enfant(s)</span>
-                            </div>
-                          </div>
-                        </ng-container>
-                      </div>
+                  <!-- Indicateur enfants -->
+                  <div
+                    *ngIf="node.children && node.children.length > 0"
+                    class="children-indicator"
+                    (click)="scrollToGeneration(level + 1)"
+                  >
+                    <span class="indicator-icon"><i class="fas fa-angle-double-down"></i></span>
+                    <span class="indicator-text">{{ node.children.length }} enfant(s)</span>
+                  </div>
+                </div>
+              </ng-container>
+            </div>
 
-                      <!-- Génération vide -->
-                      <div *ngIf="getMemberCountByLevel(level) === 0" class="empty-generation">
-                        <span class="empty-icon">👥</span>
-                        <p>Aucun membre dans cette génération</p>
-                      </div>
-                    </div>
+            <!-- Génération vide -->
+            <div *ngIf="getMemberCountByLevel(level) === 0" class="empty-generation">
+              <span class="empty-icon"><i class="fas fa-users-slash"></i></span>
+              <p>Aucun membre dans cette génération</p>
+            </div>
+          </div>
                   </div>
                 </div>
               </div>
@@ -502,14 +504,14 @@
                   <div class="list-item-content">
                     <h4>{{ person.prenom }} {{ person.nom }}</h4>
                     <div class="list-item-meta">
-                      <span class="meta-item">{{ person.genre === 'homme' ? '👨' : '👩' }}</span>
+                      <span class="meta-item"><i class="fas" [class.fa-mars]="person.genre === 'homme'" [class.fa-venus]="person.genre === 'femme'"></i></span>
                       <span class="meta-item">G{{ getPersonGeneration(person) + 1 }}</span>
-                      <span *ngIf="person.telephone" class="meta-item">📱 {{ person.telephone }}</span>
+                      <span *ngIf="person.telephone" class="meta-item"><i class="fas fa-phone"></i> {{ person.telephone }}</span>
                     </div>
                   </div>
                   <div class="list-item-actions">
-                    <button (click)="onViewDetails(person)" class="btn-action">👁️</button>
-                    <button (click)="openEditPersonModal(person)" class="btn-action">✏️</button>
+                    <button (click)="onViewDetails(person)" class="btn-action" title="Voir détails"><i class="fas fa-eye"></i></button>
+                    <button (click)="openEditPersonModal(person)" class="btn-action" title="Modifier"><i class="fas fa-edit"></i></button>
                   </div>
                 </div>
               </div>
@@ -773,15 +775,15 @@
         <!-- Boutons d'action secondaires -->
         <div class="secondary-actions">
           <button (click)="duplicatePerson(selectedPerson)" class="secondary-btn btn-warning">
-            <span class="btn-icon">⎘</span>
+            <span class="btn-icon"><i class="fas fa-copy"></i></span>
             Dupliquer
           </button>
           <button (click)="exportPersonData(selectedPerson)" class="secondary-btn btn-info">
-            <span class="btn-icon">📄</span>
+            <span class="btn-icon"><i class="fas fa-file-pdf"></i></span>
             Exporter fiche
           </button>
           <button (click)="deletePerson(selectedPerson.id)" class="secondary-btn btn-danger">
-            <span class="btn-icon">🗑️</span>
+            <span class="btn-icon"><i class="fas fa-trash-alt"></i></span>
             Supprimer
           </button>
         </div>
@@ -792,32 +794,31 @@
   <!-- Navigation rapide -->
   <nav class="quick-nav">
     <button class="nav-btn" (click)="scrollToTop()" title="Haut">
-      <span class="nav-icon">↑</span>
+      <span class="nav-icon"><i class="fas fa-arrow-up"></i></span>
     </button>
     <div class="nav-separator"></div>
     <button class="nav-btn" (click)="toggleSidebar()" [title]="sidebarCollapsed ? 'Afficher la barre latérale' : 'Masquer la barre latérale'">
-      <span class="nav-icon">{{ sidebarCollapsed ? '➡️' : '🏠' }}</span>
+      <span class="nav-icon"><i class="fas" [class.fa-arrow-right]="sidebarCollapsed" [class.fa-columns]="!sidebarCollapsed"></i></span>
     </button>
     <div class="nav-separator"></div>
     <button class="nav-btn" (click)="addQuickPerson()" title="Ajouter rapidement">
-      <span class="nav-icon">+</span>
+      <span class="nav-icon"><i class="fas fa-plus"></i></span>
     </button>
     <div class="nav-separator"></div>
     <button class="nav-btn" (click)="searchPersons()" title="Rechercher">
-      <span class="nav-icon">🔍</span>
+      <span class="nav-icon"><i class="fas fa-search"></i></span>
     </button>
     <div class="nav-separator"></div>
     <button class="nav-btn" (click)="scrollToBottom()" title="Bas">
-      <span class="nav-icon">↓</span>
+      <span class="nav-icon"><i class="fas fa-arrow-down"></i></span>
     </button>
   </nav>
 
-  <!-- Notifications toast -->
   <div class="toast-container">
     <div *ngFor="let toast of toastService.toasts$ | async" class="toast" [class]="toast.type">
-      <span class="toast-icon">{{ toast.icon }}</span>
+      <span class="toast-icon"><i [class]="toast.icon"></i></span>
       <span class="toast-message">{{ toast.message }}</span>
-      <button class="toast-close" (click)="toastService.dismiss(toast.id)">×</button>
+      <button class="toast-close" (click)="toastService.dismiss(toast.id)" title="Fermer"><i class="fas fa-times"></i></button>
     </div>
   </div>
 
@@ -828,14 +829,14 @@
   <div class="actions-dropdown-overlay" #globalDropdown (click)="closeActionsMenu($event)"
        [class.visible]="isActionsMenuOpen">
     <div class="actions-dropdown-content" (click)="$event.stopPropagation()">
-      <!-- Bouton de fermeture -->
-      <button class="dropdown-close-btn" (click)="closeActionsMenu($event)" title="Fermer">
-        ✕
-      </button>
+    <!-- Bouton de fermeture -->
+    <button class="dropdown-close-btn" (click)="closeActionsMenu($event)" title="Fermer">
+      <i class="fas fa-times"></i>
+    </button>
 
       <!-- En-tête du menu -->
       <div class="dropdown-header">
-        <span class="dropdown-icon">📋</span>
+        <span class="dropdown-icon"><i class="fas fa-bars-staggered"></i></span>
         <span class="dropdown-title">Actions rapides</span>
       </div>
 
@@ -843,16 +844,16 @@
       <div class="dropdown-section">
         <h6 class="section-title">Export</h6>
         <button (click)="exportCurrentFamily(); closeActionsMenu()" class="dropdown-item">
-          <span class="item-icon">📊</span>
+          <span class="item-icon"><i class="fas fa-file-excel"></i></span>
           <span class="item-text">Exporter Excel</span>
           <span class="item-badge">Nouveau</span>
         </button>
         <button (click)="exportToJson(); closeActionsMenu()" class="dropdown-item">
-          <span class="item-icon">💾</span>
+          <span class="item-icon"><i class="fas fa-file-code"></i></span>
           <span class="item-text">Exporter JSON</span>
         </button>
         <button (click)="exportStatistics(); closeActionsMenu()" class="dropdown-item">
-          <span class="item-icon">📈</span>
+          <span class="item-icon"><i class="fas fa-chart-line"></i></span>
           <span class="item-text">Statistiques</span>
         </button>
       </div>
@@ -860,16 +861,16 @@
       <div class="dropdown-section">
         <h6 class="section-title">Gestion</h6>
         <button (click)="duplicateFamily(); closeActionsMenu()" class="dropdown-item">
-          <span class="item-icon">⎘</span>
+          <span class="item-icon"><i class="fas fa-copy"></i></span>
           <span class="item-text">Dupliquer famille</span>
         </button>
         <button (click)="shareFamilyViaMenu(); closeActionsMenu()" class="dropdown-item">
-          <span class="item-icon">↗️</span>
+          <span class="item-icon"><i class="fas fa-share-nodes"></i></span>
           <span class="item-text">Partager</span>
           <span class="item-badge">Pro</span>
         </button>
         <button (click)="createBackup(); closeActionsMenu()" class="dropdown-item">
-          <span class="item-icon">💾</span>
+          <span class="item-icon"><i class="fas fa-cloud-arrow-up"></i></span>
           <span class="item-text">Sauvegarder</span>
         </button>
       </div>
@@ -877,15 +878,15 @@
       <div class="dropdown-section">
         <h6 class="section-title">Avancé</h6>
         <button (click)="openJsonManager(); closeActionsMenu()" class="dropdown-item">
-          <span class="item-icon">📁</span>
+          <span class="item-icon"><i class="fas fa-folder-tree"></i></span>
           <span class="item-text">Gestion JSON</span>
         </button>
         <button (click)="importFromGedcom(); closeActionsMenu()" class="dropdown-item">
-          <span class="item-icon">📤</span>
+          <span class="item-icon"><i class="fas fa-upload"></i></span>
           <span class="item-text">Importer GEDCOM</span>
         </button>
         <button (click)="clearAllData(); closeActionsMenu()" class="dropdown-item dropdown-danger">
-          <span class="item-icon">🗑️</span>
+          <span class="item-icon"><i class="fas fa-trash-can"></i></span>
           <span class="item-text">Tout effacer</span>
         </button>
       </div>

@@ -49,39 +49,65 @@
         *ngFor="let family of families"
         class="family-card"
         [class.active]="selectedFamily?.id === family.id"
+        [class.editing]="editingFamilyId === family.id"
         (click)="onSelectFamily(family)"
       >
-        <div class="card-header">
+        <div class="card-main">
           <div class="family-avatar">
-            <span class="avatar-icon"><i class="fas fa-home"></i></span>
-            <div class="avatar-progress">
-              <div
-                class="progress-fill"
-                [style.width.%]="(getFamilyMemberCount(family) / 50) * 100"
-              ></div>
+            <span class="avatar-icon"><i class="fas fa-tree"></i></span>
+            <div class="avatar-badge" *ngIf="getFamilyMemberCount(family) > 0">
+              {{ getFamilyMemberCount(family) }}
             </div>
           </div>
-          <div class="family-meta">
-            <h4>{{ family.name }}</h4>
-            <div class="meta-info">
-              <span class="info-item">
-                <span class="info-icon"><i class="fas fa-user"></i></span>
-                {{ getFamilyMemberCount(family) }}
-              </span>
-              <span class="info-item">
-                <span class="info-icon"><i class="fas fa-calendar-alt"></i></span>
-                {{ family.createdAt | date:'dd/MM' }}
-              </span>
-            </div>
+
+          <div class="family-info">
+            <ng-container *ngIf="editingFamilyId !== family.id; else editMode">
+              <h4 class="family-name">{{ family.name }}</h4>
+              <div class="family-meta">
+                <span class="meta-date"><i class="far fa-calendar-alt"></i> {{ family.createdAt | date:'dd MMM yyyy' }}</span>
+              </div>
+            </ng-container>
+
+            <ng-template #editMode>
+              <div class="edit-container" (click)="$event.stopPropagation()">
+                <input
+                  type="text"
+                  [(ngModel)]="editedFamilyName"
+                  (keyup.enter)="saveRename(family, $event)"
+                  (keyup.escape)="cancelRename($event)"
+                  autoFocus
+                  class="edit-input"
+                />
+                <div class="edit-actions">
+                  <button class="btn-save" (click)="saveRename(family, $event)" title="Enregistrer">
+                    <i class="fas fa-check"></i>
+                  </button>
+                  <button class="btn-cancel-edit" (click)="cancelRename($event)" title="Annuler">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+            </ng-template>
+          </div>
+
+          <div class="card-actions-hover" *ngIf="editingFamilyId !== family.id">
+            <button class="action-btn rename" (click)="startRename(family, $event)" title="Renommer">
+              <i class="fas fa-pencil-alt"></i>
+            </button>
+            <button class="action-btn delete" (click)="onDeleteFamily(family, $event)" title="Supprimer">
+              <i class="fas fa-trash-alt"></i>
+            </button>
           </div>
         </div>
 
-        <div class="card-preview">
-          <div class="preview-tree">
-            <div class="tree-level" *ngFor="let level of [1,2,3]"></div>
+        <div class="card-footer" *ngIf="editingFamilyId !== family.id">
+          <div class="progress-container">
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="Math.min((getFamilyMemberCount(family) / 20) * 100, 100)"></div>
+            </div>
           </div>
-          <button class="btn-quick-view" type="button" (click)="$event.stopPropagation(); onQuickView(family)" aria-label="Aperçu rapide de la famille">
-            <i class="fas fa-eye"></i>
+          <button class="btn-quick-view" type="button" (click)="$event.stopPropagation(); onQuickView(family)" title="Aperçu rapide">
+            <i class="fas fa-external-link-alt"></i>
           </button>
         </div>
       </div>
